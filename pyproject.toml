@@ -1,0 +1,28 @@
+[project]
+name = "playground"
+version = "0.1.0"
+
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+color = true
+
+[tool.pylint.main]
+disable = [
+    "line-too-long",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "duplicate-code",
+    "too-few-public-methods",
+    "no-member",
+    "fixme",
+    "logging-too-many-args",
+    "no-name-in-module",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "too-many-locals",
+]
+ignore-paths = ["./.venv"]
+logging-format-style = "new"

@@ -1,0 +1,10 @@
+torch
+numpy
+jupyter
+gymnasium
+gymnasium[box2d]
+imageio
+pillow
+wandb
+black
+pylint
