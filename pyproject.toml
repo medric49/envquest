@@ -1,7 +1,24 @@
 [project]
 name = "playground"
 version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "gymnasium[box2d]>=1.0.0",
+    "imageio>=2.36.1",
+    "pillow>=11.0.0",
+    "torch>=2.5.1",
+    "wandb>=0.19.1",
+]
 
+[dependency-groups]
+dev = [
+    "black>=24.10.0",
+    "jupyter>=1.1.1",
+    "pylint>=3.3.2",
+]
+
+[tool.uv]
+native-tls = true
 
 [tool.black]
 line-length = 120
