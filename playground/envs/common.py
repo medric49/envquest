@@ -16,7 +16,7 @@ class TimeStep(NamedTuple):
     step_type: StepType
     truncated: bool
     observation: np.ndarray
-    action: np.ndarray
+    action: np.ndarray | None
     reward: np.ndarray
 
     def first(self):
@@ -41,10 +41,12 @@ class Environment(metaclass=abc.ABCMeta):
     def step(self, action: np.ndarray) -> TimeStep:
         pass
 
+    @property
     @abc.abstractmethod
-    def observation_space(self) -> gym.Space:
+    def observation_space(self) -> gym.spaces.Box:
         pass
 
+    @property
     @abc.abstractmethod
     def action_space(self) -> gym.Space:
         pass
