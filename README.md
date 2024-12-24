@@ -1,15 +1,19 @@
 # playground
-Play with reinforcement learning algorithm
+Play with reinforcement learning algorithms.
 
 ## Requirements
+
 You need these requirements to run the project:
 * python >= 3.9
 * [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 
-## Set up
+## Installation
+
 Install the python dependencies
 ```shell
+uv venv .venv
+source .venv/bin/activate
 uv sync --frozen
 ```
 
