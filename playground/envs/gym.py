@@ -11,30 +11,36 @@ class GymEnvironment(Environment, abc.ABC):
     def __init__(self, env: gym.Env):
         self._env = env
 
-    def render(self, width: int, height: int) -> Image:
-        return Image.fromarray(self._env.render()).resize((width, height))
-
-
-class DiscreteGymEnvironment(GymEnvironment):
-    def __init__(self, env: gym.Env):
-        super().__init__(env)
-
     def reset(self) -> TimeStep:
         observation, _ = self._env.reset()
         reward = np.array(0, dtype=np.float32)
         return TimeStep(step_type=StepType.FIRST, truncated=False, observation=observation, action=None, reward=reward)
 
     def step(self, action: np.ndarray) -> TimeStep:
-        f_action = action + self._env.action_space.start
+        f_action = self.transform_action(action)
         observation, reward, terminated, truncated, _ = self._env.step(f_action)
+        step_type = StepType.MID if not (terminated or truncated) else StepType.LAST
         reward = np.array(reward, dtype=np.float32)
-        return TimeStep(
-            step_type=StepType.FIRST, truncated=False, observation=observation, action=action, reward=reward
-        )
+        return TimeStep(step_type=step_type, truncated=truncated, observation=observation, action=action, reward=reward)
 
     @property
     def observation_space(self) -> gym.spaces.Box:
         return self._env.observation_space
+
+    def render(self, im_w: int, im_h: int) -> Image:
+        return Image.fromarray(self._env.render()).resize((im_w, im_h))
+
+    @abc.abstractmethod
+    def transform_action(self, action):
+        pass
+
+
+class DiscreteGymEnvironment(GymEnvironment):
+    def __init__(self, env: gym.Env):
+        super().__init__(env)
+
+    def transform_action(self, action):
+        return action + self._env.action_space.start
 
     @property
     def action_space(self) -> gym.spaces.Discrete:
@@ -45,25 +51,11 @@ class ContinuousGymEnvironment(GymEnvironment):
     def __init__(self, env: gym.Env):
         super().__init__(env)
 
-    def reset(self) -> TimeStep:
-        observation, _ = self._env.reset()
-        reward = np.array(0, dtype=np.float32)
-        return TimeStep(step_type=StepType.FIRST, truncated=False, observation=observation, action=None, reward=reward)
-
-    def step(self, action: np.ndarray) -> TimeStep:
-        f_action = self._env.action_space.low + (action - self.action_space.low) * (
+    def transform_action(self, action):
+        return self._env.action_space.low + (action - self.action_space.low) * (
             (self._env.action_space.high - self._env.action_space.low)
             / (self.action_space.high - self.action_space.low)
         )
-        observation, reward, terminated, truncated, _ = self._env.step(f_action)
-        reward = np.array(reward, dtype=np.float32)
-        return TimeStep(
-            step_type=StepType.FIRST, truncated=False, observation=observation, action=action, reward=reward
-        )
-
-    @property
-    def observation_space(self) -> gym.spaces.Box:
-        return self._env.observation_space
 
     @property
     def action_space(self) -> gym.spaces.Box:

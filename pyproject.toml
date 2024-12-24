@@ -3,8 +3,10 @@ name = "playground"
 version = "0.1.0"
 requires-python = ">=3.9"
 dependencies = [
+    "fire>=0.7.0",
     "gymnasium[box2d]>=1.0.0",
     "imageio>=2.36.1",
+    "opencv-python>=4.10.0.84",
     "pillow>=11.0.0",
     "torch>=2.5.1",
     "wandb>=0.19.1",
@@ -40,6 +42,7 @@ disable = [
     "too-many-arguments",
     "too-many-positional-arguments",
     "too-many-locals",
+    "useless-parent-delegation"
 ]
 ignore-paths = ["./.venv"]
 logging-format-style = "new"

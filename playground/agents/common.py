@@ -26,7 +26,7 @@ class Agent(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def act(self, observation: np.ndarray, **kwargs) -> np.ndarray:
+    def act(self, **kwargs) -> np.ndarray:
         pass
 
     @abc.abstractmethod
@@ -42,7 +42,7 @@ class OneActionAgent(Agent):
     def memorize(self, timestep: TimeStep, next_timestep: TimeStep):
         pass
 
-    def act(self, observation: np.ndarray, **kwargs) -> np.ndarray:
+    def act(self, **kwargs) -> np.ndarray:
         return self._action
 
     def improve(self, **kwargs) -> dict:
@@ -54,7 +54,7 @@ class RandomAgent(Agent):
     def memorize(self, timestep: TimeStep, next_timestep: TimeStep):
         pass
 
-    def act(self, *args) -> np.ndarray:
+    def act(self, **kwargs) -> np.ndarray:
         return self.action_space.sample()
 
     def improve(self, **kwargs) -> dict:

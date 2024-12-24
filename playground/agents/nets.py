@@ -1,4 +1,4 @@
-import torch.nn as nn
+from torch import nn
 from torch import distributions
 import torch
 from torch.distributions.utils import _standard_normal
@@ -7,7 +7,7 @@ from torch.distributions.utils import _standard_normal
 class DiscreteQNet(nn.Module):
 
     def __init__(self, observation_dim: int, num_actions: int):
-        super(DiscreteQNet, self).__init__()
+        super().__init__()
         self.layer1 = nn.Linear(observation_dim, 128)
         self.layer2 = nn.Linear(128, 128)
         self.layer3 = nn.Linear(128, num_actions)
@@ -31,7 +31,7 @@ class TruncatedNormal(distributions.Normal):
         x = x - x.detach() + clipped_x.detach()
         return x
 
-    def sample(self, clip=None, sample_shape=torch.Size()):
+    def sample(self, sample_shape=torch.Size(), clip=None):
         shape = self._extended_shape(sample_shape)
         eps = _standard_normal(shape, dtype=self.loc.dtype, device=self.loc.device)
         eps *= self.scale
@@ -39,6 +39,9 @@ class TruncatedNormal(distributions.Normal):
             eps = torch.clip(eps, -clip, clip)
         x = self.loc + eps
         return self._clip(x)
+
+    def enumerate_support(self, expand: bool = True) -> torch.Tensor:
+        return super().enumerate_support()
 
 
 class DiscretePolicyNet(nn.Module):

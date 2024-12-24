@@ -52,5 +52,5 @@ class Environment(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def render(self, width: int, height: int) -> Image:
+    def render(self, im_w: int, im_h: int) -> Image:
         pass
