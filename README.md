@@ -6,6 +6,13 @@ Play with reinforcement learning algorithms.
 You need these requirements to run the project:
 * python >= 3.9
 * [uv](https://docs.astral.sh/uv/getting-started/installation/)
+* ffmpeg
+```shell
+# Linux
+sudo apt install ffmpeg
+# MacOS
+brew install ffmpeg
+```
 
 
 ## Installation
@@ -17,6 +24,10 @@ source .venv/bin/activate
 uv sync --frozen
 ```
 
+Log in to WandB and paste your WandB API key
+```shell
+wandb login
+```
 
 ## Usage
 Run a random agent in a Gym environment

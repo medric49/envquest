@@ -9,7 +9,7 @@ import playground as pg
 
 def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
     env = pg.envs.gym.make_env(env_name)
-    agent = pg.agents.RandomAgent(env.observation_space, env.action_space)
+    agent = pg.agents.primitives.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()
     while not timestep.last():

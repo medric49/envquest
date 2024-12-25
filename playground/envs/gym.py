@@ -9,14 +9,17 @@ from playground.envs.common import Environment, TimeStep, StepType
 
 class GymEnvironment(Environment, abc.ABC):
     def __init__(self, env: gym.Env):
+        super().__init__()
         self._env = env
 
     def reset(self) -> TimeStep:
+        self.episode_length = 0
         observation, _ = self._env.reset()
         reward = np.array(0, dtype=np.float32)
         return TimeStep(step_type=StepType.FIRST, truncated=False, observation=observation, action=None, reward=reward)
 
     def step(self, action: np.ndarray) -> TimeStep:
+        self.episode_length += 1
         f_action = self.transform_action(action)
         observation, reward, terminated, truncated, _ = self._env.step(f_action)
         step_type = StepType.MID if not (terminated or truncated) else StepType.LAST

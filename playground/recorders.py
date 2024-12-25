@@ -1,5 +1,9 @@
 from pathlib import Path
+
+import cv2
 import imageio
+import numpy as np
+from PIL.Image import Image
 
 
 class EpisodeRecorder:
@@ -9,13 +13,20 @@ class EpisodeRecorder:
         self.frames = None
         self.fps = fps
 
-    def start_recording(self, frame):
+    def start_recording(self, frame: Image):
         self.frames = [frame]
 
-    def record(self, frame):
+    def record(self, frame: Image):
         self.frames.append(frame)
 
     def save(self, filename):
         path = self.save_dir / filename
-        imageio.mimsave(str(path), self.frames, fps=self.fps)
+
+        frames = []
+        for frame in self.frames:
+            frame = np.asarray(frame)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frames.append(frame)
+
+        imageio.mimsave(str(path), frames, fps=self.fps)
         return self.frames

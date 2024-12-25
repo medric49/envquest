@@ -33,6 +33,9 @@ class TimeStep(NamedTuple):
 
 
 class Environment(metaclass=abc.ABCMeta):
+    def __init__(self):
+        self.episode_length = None
+
     @abc.abstractmethod
     def reset(self) -> TimeStep:
         pass
