@@ -24,9 +24,9 @@ source .venv/bin/activate
 uv sync --frozen
 ```
 
-Log in to WandB and paste your WandB API key
+Start a local WandB server to track your experiments
 ```shell
-wandb login
+wandb server start
 ```
 
 ## Usage

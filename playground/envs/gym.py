@@ -5,6 +5,7 @@ import gymnasium as gym
 from PIL import Image
 
 from playground.envs.common import Environment, TimeStep, StepType
+from playground.envs.wrappers import MaxEpisodeLengthWrapper
 
 
 class GymEnvironment(Environment, abc.ABC):
@@ -70,7 +71,7 @@ class ContinuousGymEnvironment(GymEnvironment):
         )
 
 
-def make_env(task="LunarLander-v3"):
+def make_env(task: str = "LunarLander-v3", max_episode_length: int = None) -> GymEnvironment:
     env = gym.make(task, render_mode="rgb_array")
 
     if not isinstance(env.observation_space, gym.spaces.Box):
@@ -82,4 +83,8 @@ def make_env(task="LunarLander-v3"):
         env = ContinuousGymEnvironment(env)
     else:
         raise TypeError(f"[{env.action_space.__class__.__name__}] action space not supported")
+
+    if max_episode_length is not None:
+        env = MaxEpisodeLengthWrapper(env, max_episode_length)
+
     return env

@@ -10,7 +10,7 @@ import wandb
 from playground import config, utils
 from playground.agents.common import Agent
 from playground.arguments import TrainingArguments
-from playground.envs.common import Environment
+from playground.envs.common import EnvMixin
 from playground.recorders import EpisodeRecorder
 
 
@@ -19,7 +19,7 @@ class Trainer:
         self,
         arguments: TrainingArguments,
         agent: Agent,
-        env: Environment,
+        env: EnvMixin,
     ):
         self.arguments = arguments
         self.agent = agent

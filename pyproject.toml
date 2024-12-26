@@ -11,7 +11,7 @@ dependencies = [
     "torch>=2.5.1",
     "tqdm>=4.67.1",
     "tyro>=0.9.5",
-    "wandb>=0.19.1",
+    "wandb[media]>=0.19.1",
 ]
 
 [dependency-groups]
@@ -44,7 +44,9 @@ disable = [
     "too-many-arguments",
     "too-many-positional-arguments",
     "too-many-locals",
-    "useless-parent-delegation"
+    "useless-parent-delegation",
+    "too-many-instance-attributes",
+    "too-many-branches"
 ]
 ignore-paths = ["./.venv"]
 logging-format-style = "new"

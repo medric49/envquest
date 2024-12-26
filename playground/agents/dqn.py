@@ -34,7 +34,7 @@ class DiscreteQNetAgent(Agent):
         tau: float,
         eps_start: float,
         eps_end: float,
-        eps_duration: float,
+        eps_step_duration: float,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
@@ -55,12 +55,12 @@ class DiscreteQNetAgent(Agent):
         self.step_count = 0
         self.eps_start = eps_start
         self.eps_end = eps_end
-        self.eps_duration = eps_duration
+        self.eps_step_duration = eps_step_duration
 
     @property
     def current_noise(self):
-        # mix = np.clip(self.step_count / self.eps_duration, 0.0, 1.0)
-        mix = 1 - np.exp(-4 * self.step_count / self.eps_duration)
+        # mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
+        mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
         noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
         return noise
 
@@ -88,7 +88,10 @@ class DiscreteQNetAgent(Agent):
             action = np.asarray(action, dtype=np.int64)
         return action
 
-    def improve(self, batch_size: int, **kwargs) -> dict:
+    def improve(self, batch_size: int = None, **kwargs) -> dict:
+        if batch_size is None:
+            raise ValueError("batch_size is required")
+
         if len(self.memory) == 0:
             return {}
 

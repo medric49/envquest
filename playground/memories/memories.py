@@ -34,7 +34,7 @@ class ReplayMemory:
         self.actions.append(action)
         self.rewards.append(reward)
         self.next_observations.append(next_observation)
-        self.next_terminal_steps.append(next_timestep.last())  # and not next_timestep.truncated
+        self.next_terminal_steps.append(next_timestep.last() and not next_timestep.truncated)
 
     def __len__(self):
         return len(self.observations)

@@ -32,10 +32,7 @@ class TimeStep(NamedTuple):
         return getattr(self, attr)
 
 
-class Environment(metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.episode_length = None
-
+class EnvMixin(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def reset(self) -> TimeStep:
         pass
@@ -57,3 +54,16 @@ class Environment(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def render(self, im_w: int, im_h: int) -> Image:
         pass
+
+
+class Environment(EnvMixin, abc.ABC):
+    def __init__(self):
+        self.episode_length = None
+
+
+class Wrapper(EnvMixin, abc.ABC):
+    def __init__(self, env: Environment):
+        self._env = env
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class TrainingArguments:
     # General
     task: str = "LunarLander-v3"
-    max_episode_len: int = 100
+    max_episode_length: int = 500
 
     # Trainer
     num_train_steps: int = 100000
@@ -22,7 +22,7 @@ class TrainingArguments:
     tau: float = 0.005
     eps_start: float = 0.95
     eps_end: float = 0.05
-    eps_duration: int = 20000
+    eps_step_duration: int = 20000
 
     # Evaluation
     num_eval_episodes: int = 5
@@ -34,5 +34,5 @@ class TrainingArguments:
     render_width: int = 256
     render_height: int = 256
     save_train_videos: bool = False
-    log_eval_videos: bool = False
+    log_eval_videos: bool = True
     save_eval_videos: bool = True
