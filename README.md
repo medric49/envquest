@@ -31,14 +31,19 @@ wandb server start
 
 ## Usage
 
-### Run a random policy agent ([scripts/run_random_agent.py](scripts/run_random_agent.py))
+### Run a random policy agent
 Run a random agent in a Gym environment 
 ```shell
 python -m scripts.run_random_agent
 ```
 
-### Train a DQN Agent ([scripts/train_dqn.py](scripts/train_dqn.py))
+Read the python script for more information: [scripts/run_random_agent.py](scripts/run_random_agent.py)
+
+### Train a DQN Agent
+
 Train a DQN policy agent in a Gym environment
 ```shell
 python -m scripts.train_dqn
 ```
+
+Read the python script for more information: [scripts/train_dqn.py](scripts/train_dqn.py)
