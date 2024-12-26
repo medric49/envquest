@@ -10,20 +10,20 @@ import wandb
 from playground import config, utils
 from playground.agents.common import Agent
 from playground.arguments import TrainingArguments
-from playground.envs.common import EnvMixin
+from playground.envs.common import Environment
 from playground.recorders import EpisodeRecorder
 
 
 class Trainer:
     def __init__(
         self,
-        arguments: TrainingArguments,
+        env: Environment,
         agent: Agent,
-        env: EnvMixin,
+        arguments: TrainingArguments,
     ):
-        self.arguments = arguments
-        self.agent = agent
         self.env = env
+        self.agent = agent
+        self.arguments = arguments
 
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         exp_id = (

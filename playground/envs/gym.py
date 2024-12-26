@@ -12,15 +12,16 @@ class GymEnvironment(Environment, abc.ABC):
     def __init__(self, env: gym.Env):
         super().__init__()
         self._env = env
+        self._episode_length = None
 
     def reset(self) -> TimeStep:
-        self.episode_length = 0
+        self._episode_length = 0
         observation, _ = self._env.reset()
         reward = np.array(0, dtype=np.float32)
         return TimeStep(step_type=StepType.FIRST, truncated=False, observation=observation, action=None, reward=reward)
 
     def step(self, action: np.ndarray) -> TimeStep:
-        self.episode_length += 1
+        self._episode_length += 1
         f_action = self.transform_action(action)
         observation, reward, terminated, truncated, _ = self._env.step(f_action)
         step_type = StepType.MID if not (terminated or truncated) else StepType.LAST
@@ -37,6 +38,10 @@ class GymEnvironment(Environment, abc.ABC):
     @abc.abstractmethod
     def transform_action(self, action):
         pass
+
+    @property
+    def episode_length(self) -> int:
+        return self._episode_length
 
 
 class DiscreteGymEnvironment(GymEnvironment):

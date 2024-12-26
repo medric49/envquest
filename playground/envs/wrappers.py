@@ -15,7 +15,7 @@ class MaxEpisodeLengthWrapper(Wrapper):
 
     def step(self, action: np.ndarray) -> TimeStep:
         timestep = self._env.step(action)
-        if self._env.episode_length >= self.max_episode_length and not timestep.last():
+        if self.episode_length >= self.max_episode_length and not timestep.last():
             timestep = timestep._replace(step_type=StepType.LAST, truncated=True)
         return timestep
 
