@@ -15,9 +15,9 @@ class StepType(enum.IntEnum):
 class TimeStep(NamedTuple):
     step_type: StepType
     truncated: bool
-    observation: np.ndarray
-    action: np.ndarray | None
-    reward: np.ndarray
+    observation: np.ndarray  # o_{t}
+    action: np.ndarray | None  # a_{t-1}
+    reward: np.ndarray  # r_{t}
 
     def first(self):
         return self.step_type == StepType.FIRST

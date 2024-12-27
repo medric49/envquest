@@ -4,38 +4,33 @@ import torch
 
 from playground import utils
 from playground.agents.common import Agent
-from playground.functions.discrete_qnet import DiscreteQNet
-from playground.utils import init_weights
 from playground.envs.common import TimeStep
+from playground.functions.discrete_qnet import DiscreteQNet
 from playground.memories import ReplayMemory
 
 
-class DiscreteQNetAgent(Agent):
+class DiscreteSarsaAgent(Agent):
     def __init__(
         self,
         mem_capacity: int,
         discount: float,
         lr: float,
-        tau: float,
         eps_start: float,
         eps_end: float,
         eps_step_duration: int,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
-        super().__init__(observation_space=observation_space, action_space=action_space)
+        super().__init__(observation_space, action_space)
 
         self.memory = ReplayMemory(mem_capacity, discount)
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
-        self.target_q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
-        self.q_net.apply(init_weights)
-        self.target_q_net.load_state_dict(self.q_net.state_dict())
+
         self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=lr)
         self.criterion = torch.nn.MSELoss()
         self.discount = discount
-        self.tau = tau
 
         self.step_count = 0
         self.eps_start = eps_start
@@ -80,7 +75,7 @@ class DiscreteQNetAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size)
+        obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size, recent=True)
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
 
@@ -89,7 +84,6 @@ class DiscreteQNetAgent(Agent):
         next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.q_net.eval()
-        self.target_q_net.eval()
         with torch.no_grad():
             next_action = self.q_net(next_obs).max(dim=1)[1].to(dtype=torch.int64)
             next_value = (self.target_q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()) * (

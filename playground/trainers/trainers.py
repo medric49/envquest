@@ -27,9 +27,9 @@ class Trainer:
 
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         exp_id = (
-            f"{self.arguments.task.replace('/', '_')}_{now}"
-            if self.arguments.exp_id is None
-            else f"{self.arguments.exp_id}_{now}"
+            f"{self.arguments.env.task.replace('/', '_')}_{now}"
+            if self.arguments.logging.exp_id is None
+            else f"{self.arguments.logging.exp_id}_{now}"
         )
 
         self.exp_id = exp_id
@@ -46,9 +46,9 @@ class Trainer:
         timestep = self.env.reset()
         agent_return = timestep.reward
 
-        if self.arguments.save_eval_videos:
+        if self.arguments.logging.save_eval_videos:
             self.eval_recorder.start_recording(
-                self.env.render(self.arguments.render_width, self.arguments.render_height)
+                self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
             )
 
         frames = None
@@ -57,9 +57,11 @@ class Trainer:
             timestep = self.env.step(action)
             agent_return += timestep.reward
 
-            if self.arguments.save_eval_videos:
-                self.eval_recorder.record(self.env.render(self.arguments.render_width, self.arguments.render_height))
-        if self.arguments.save_eval_videos:
+            if self.arguments.logging.save_eval_videos:
+                self.eval_recorder.record(
+                    self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
+                )
+        if self.arguments.logging.save_eval_videos:
             frames = self.eval_recorder.save(video_name)
         return agent_return, frames
 
@@ -67,7 +69,7 @@ class Trainer:
         agent_return_list = []
         frames_list = []
 
-        for i in tqdm(range(self.arguments.num_eval_episodes), colour="green"):
+        for i in tqdm(range(self.arguments.trainer.num_eval_episodes), colour="green"):
             agent_return, frames = self.run_eval_episode(video_name=f"{self.train_episode}_{i}.mp4")
             if frames is not None:
                 frames_list.append(frames)
@@ -80,7 +82,7 @@ class Trainer:
         }
         wandb.log(metrics, step=self.train_step)
 
-        if self.arguments.log_eval_videos and self.arguments.save_eval_videos:
+        if self.arguments.logging.log_eval_videos and self.arguments.logging.save_eval_videos:
             frames_list = [np.asarray(frames, dtype=np.uint8).transpose((0, 3, 1, 2)) for frames in frames_list]
             frames_list = np.concatenate(frames_list)
             wandb.log({"eval/demo": wandb.Video(frames_list, fps=20)}, step=self.train_step)
@@ -97,15 +99,15 @@ class Trainer:
         wandb.log_artifact(wandb_artifact, aliases=["latest", f"step_{self.train_step}"])
 
     def train(self):
-        wandb.init(project=self.arguments.project_name, name=self.exp_id)
+        wandb.init(project=self.arguments.logging.project_name, name=self.exp_id)
 
-        update_every_step = utils.Every(self.arguments.update_every_steps)
-        eval_every_step = utils.Every(self.arguments.eval_every_steps)
-        seed_until_step = utils.Until(self.arguments.num_seed_steps)
+        update_every_step = utils.Every(self.arguments.trainer.update_every_steps)
+        eval_every_step = utils.Every(self.arguments.trainer.eval_every_steps)
+        seed_until_step = utils.Until(self.arguments.trainer.num_seed_steps)
         eval_scheduled = False
 
-        with tqdm(total=self.arguments.num_train_steps) as pbar:
-            while self.train_step < self.arguments.num_train_steps:
+        with tqdm(total=self.arguments.trainer.num_train_steps) as pbar:
+            while self.train_step < self.arguments.trainer.num_train_steps:
                 self.train_episode += 1
                 pbar.set_postfix({"Episode": self.train_episode})
 
@@ -113,9 +115,9 @@ class Trainer:
                 timestep = self.env.reset()
                 agent_return = timestep.reward
 
-                if self.arguments.save_train_videos:
+                if self.arguments.logging.save_train_videos:
                     self.train_recorder.start_recording(
-                        self.env.render(self.arguments.render_width, self.arguments.render_height)
+                        self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
                     )
 
                 while not timestep.last():
@@ -142,10 +144,9 @@ class Trainer:
 
                     # Improve agents
                     if not seed_until_step(self.train_step) and update_every_step(self.train_step):
-                        for _ in range(self.arguments.num_updates):
+                        for _ in range(self.arguments.trainer.num_updates):
                             metrics = self.agent.improve(
-                                batch_size=self.arguments.batch_size,
-                                n_steps=self.arguments.n_steps,
+                                batch_size=self.arguments.trainer.batch_size,
                             )
                         wandb.log(metrics, step=self.train_step)
 
@@ -153,9 +154,9 @@ class Trainer:
                     agent_return += timestep.reward
 
                     # Record step
-                    if self.arguments.save_train_videos:
+                    if self.arguments.logging.save_train_videos:
                         self.train_recorder.record(
-                            self.env.render(self.arguments.render_width, self.arguments.render_height)
+                            self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
                         )
 
                     # Log return and training video
@@ -163,7 +164,7 @@ class Trainer:
                         metrics = {"train/eps_length": self.env.episode_length, "train/return": agent_return}
                         wandb.log(metrics, step=self.train_step)
 
-                        if self.arguments.save_train_videos:
+                        if self.arguments.logging.save_train_videos:
                             self.train_recorder.save(
                                 f"{self.train_episode}_{int(agent_return)}.mp4",
                             )
@@ -173,7 +174,7 @@ class Trainer:
                         eval_scheduled = True
 
                 # Start evaluation
-                if eval_scheduled or self.train_step >= self.arguments.num_train_steps:
+                if eval_scheduled or self.train_step >= self.arguments.trainer.num_train_steps:
                     self.eval()
                     self.save()
                     eval_scheduled = False
