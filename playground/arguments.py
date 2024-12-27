@@ -25,7 +25,7 @@ class TrainerArguments:
     num_train_steps: int = 100000
     num_seed_steps: int = 5000
     num_updates: int = 2
-    update_every_steps: int = 16
+    update_every_steps: int = 8
 
     # Evaluation
     num_eval_episodes: int = 5
@@ -37,15 +37,22 @@ class AgentArguments:
     mem_capacity: int = 100000
     discount: float = 0.99
     lr: float = 1e-3
-    tau: float = 0.005
     eps_start: float = 0.95
     eps_end: float = 0.05
     eps_step_duration: int = 50000
 
 
+class DQNAgentArguments(AgentArguments):
+    tau: float = 0.005
+
+
+class SarsaAgentArguments(AgentArguments):
+    pass
+
+
 @dataclass
 class TrainingArguments:
     env: EnvArguments = EnvArguments()
-    agent: AgentArguments = AgentArguments()
+    agent: AgentArguments = None
     trainer: TrainerArguments = TrainerArguments()
     logging: LoggingArguments = LoggingArguments()

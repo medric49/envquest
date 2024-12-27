@@ -2,12 +2,12 @@ from collections import deque
 import numpy as np
 
 from playground.envs.common import TimeStep
+from playground.memories.common import AgentMemory
 
 
-class ReplayMemory:
+class DQNAgentMemory(AgentMemory):
     def __init__(self, capacity: int, discount: float):
-        self.discount = discount
-        self.capacity = capacity
+        super().__init__(capacity, discount)
 
         self.observations = None
         self.actions = None
@@ -49,7 +49,9 @@ class ReplayMemory:
     def __len__(self):
         return len(self.observations)
 
-    def get_steps(self, size: int, recent=False, exclude_first_steps=False, exclude_last_steps=False) -> tuple[np.ndarray, ...]:
+    def sample(
+        self, size: int, recent=False, exclude_first_steps=False, exclude_last_steps=False, **kwargs
+    ) -> tuple[np.ndarray, ...]:
         indices = np.arange(len(self), dtype=np.int32)
         if exclude_first_steps:
             indices = indices[~np.asarray(self.first_step_indices, dtype=np.bool)]

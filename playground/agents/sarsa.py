@@ -6,7 +6,7 @@ from playground import utils
 from playground.agents.common import Agent
 from playground.envs.common import TimeStep
 from playground.functions.discrete_qnet import DiscreteQNet
-from playground.memories import ReplayMemory
+from playground.memories.sarsa import SarsaAgentMemory
 
 
 class DiscreteSarsaAgent(Agent):
@@ -23,7 +23,7 @@ class DiscreteSarsaAgent(Agent):
     ):
         super().__init__(observation_space, action_space)
 
-        self.memory = ReplayMemory(mem_capacity, discount)
+        self.memory = SarsaAgentMemory(mem_capacity, discount)
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
@@ -75,22 +75,19 @@ class DiscreteSarsaAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        prev_action, prev_reward, obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size, recent=True, exclude_first_steps=True)
+        obs, action, reward, next_obs, next_action, next_obs_terminal = self.memory.sample(size=batch_size)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
-        action = torch.tensor(prev_action, dtype=torch.int64, device=utils.device())
-
-        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
         reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        next_action = torch.tensor(next_action, dtype=torch.int64, device=utils.device())
         next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.q_net.eval()
         with torch.no_grad():
-            next_action = self.q_net(next_obs).max(dim=1)[1].to(dtype=torch.int64)
-            next_value = (self.target_q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()) * (
-                1.0 - next_obs_terminal
-            )
+            next_value = self.q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()
+            next_value = next_value * (1.0 - next_obs_terminal)
         target = reward + self.discount * next_value
 
         self.q_net.train()
@@ -101,12 +98,6 @@ class DiscreteSarsaAgent(Agent):
         loss = self.criterion(value, target)
         loss.backward()
         self.optimizer.step()
-
-        target_state_dict = self.target_q_net.state_dict()
-        source_state_dict = self.q_net.state_dict()
-        for key in source_state_dict:
-            target_state_dict[key] = source_state_dict[key] * self.tau + target_state_dict[key] * (1 - self.tau)
-        self.target_q_net.load_state_dict(target_state_dict)
 
         return {
             "train/batch/reward": reward.mean().item(),

@@ -1,12 +1,14 @@
 import gymnasium as gym
 
 import playground as pg
-from playground.arguments import TrainingArguments, DQNAgentArguments
+from playground.arguments import TrainerArguments, TrainingArguments, SarsaAgentArguments
 
 
 def main():
     # Training arguments
-    arguments = TrainingArguments(agent=DQNAgentArguments())
+    arguments = TrainingArguments(
+        trainer=TrainerArguments(batch_size=1, num_updates=1, update_every_steps=1), agent=SarsaAgentArguments()
+    )
 
     # Define environment
     env = pg.envs.gym.make_env(**arguments.env.__dict__)

@@ -7,7 +7,7 @@ from playground.agents.common import Agent
 from playground.functions.discrete_qnet import DiscreteQNet
 from playground.utils import init_weights
 from playground.envs.common import TimeStep
-from playground.memories import ReplayMemory
+from playground.memories.dqn import DQNAgentMemory
 
 
 class DiscreteQNetAgent(Agent):
@@ -25,7 +25,7 @@ class DiscreteQNetAgent(Agent):
     ):
         super().__init__(observation_space=observation_space, action_space=action_space)
 
-        self.memory = ReplayMemory(mem_capacity, discount)
+        self.memory = DQNAgentMemory(mem_capacity, discount)
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
@@ -80,7 +80,7 @@ class DiscreteQNetAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size)
+        obs, action, reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size)
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
 
