@@ -24,8 +24,8 @@ class TrainerArguments:
     batch_size: int = 128
     num_train_steps: int = 100000
     num_seed_steps: int = 5000
-    num_updates: int = 1
-    update_every_steps: int = 1
+    num_updates: int = 2
+    update_every_steps: int = 16
 
     # Evaluation
     num_eval_episodes: int = 5
@@ -34,14 +34,13 @@ class TrainerArguments:
 
 @dataclass
 class AgentArguments:
-    n_steps: int = 1
     mem_capacity: int = 100000
     discount: float = 0.99
     lr: float = 1e-3
     tau: float = 0.005
     eps_start: float = 0.95
     eps_end: float = 0.05
-    eps_step_duration: int = 20000
+    eps_step_duration: int = 50000
 
 
 @dataclass

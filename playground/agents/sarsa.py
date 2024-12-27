@@ -75,10 +75,12 @@ class DiscreteSarsaAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size, recent=True)
-        obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
-        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        prev_action, prev_reward, obs, action, reward, next_obs, next_obs_terminal = self.memory.get_steps(size=batch_size, recent=True, exclude_first_steps=True)
 
+        obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
+        action = torch.tensor(prev_action, dtype=torch.int64, device=utils.device())
+
+        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
         reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
         next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
