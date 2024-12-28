@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class EnvArguments:
-    task: str = "LunarLander-v3"
-    max_episode_length: int = 500
+    task: str = "CartPole-v1"
+    max_episode_length: int = 1000
 
 
 @dataclass
@@ -22,15 +22,15 @@ class LoggingArguments:
 @dataclass
 class TrainerArguments:
     # Training
-    batch_size: int = 256
-    num_train_steps: int = 100000
+    batch_size: int = 64
+    num_train_steps: int = 1000000
     num_seed_steps: int = 5000
-    num_updates: int = 2
-    update_every_steps: int = 4
+    num_updates: int = 1
+    update_every_steps: int = 1
 
     # Evaluation
     num_eval_episodes: int = 5
-    eval_every_steps: int = 2000
+    eval_every_steps: int = 10000
 
 
 @dataclass
@@ -40,14 +40,14 @@ class AgentArguments:
     lr: float = 1e-3
     eps_start: float = 0.95
     eps_end: float = 0.05
-    eps_step_duration: int = 50000
+    eps_step_duration: int = 25000
 
 
 @dataclass
 class DQNAgentArguments(AgentArguments):
     class_name: str = "dqn"
     tau: float = 0.005
-    mem_capacity: int = 100000
+    mem_capacity: int = 1000000
 
 
 @dataclass
