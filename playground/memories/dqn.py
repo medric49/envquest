@@ -7,7 +7,8 @@ from playground.memories.common import AgentMemory
 
 class DQNAgentMemory(AgentMemory):
     def __init__(self, capacity: int, discount: float):
-        super().__init__(capacity, discount)
+        self.discount = discount
+        self.capacity = capacity
 
         self.observations = None
         self.actions = None
@@ -50,8 +51,11 @@ class DQNAgentMemory(AgentMemory):
         return len(self.observations)
 
     def sample(
-        self, size: int, recent=False, exclude_first_steps=False, exclude_last_steps=False, **kwargs
+        self, size: int = None, recent=False, exclude_first_steps=False, exclude_last_steps=False, **kwargs
     ) -> tuple[np.ndarray, ...]:
+        if size is None:
+            raise ValueError("size is required")
+
         indices = np.arange(len(self), dtype=np.int32)
         if exclude_first_steps:
             indices = indices[~np.asarray(self.first_step_indices, dtype=np.bool)]

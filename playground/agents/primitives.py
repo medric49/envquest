@@ -1,12 +1,14 @@
 import numpy as np
 
+import gymnasium as gym
+
 from playground.agents.common import Agent
 from playground.envs.common import TimeStep
 
 
 class OneActionAgent(Agent):
-    def __init__(self, action: np.ndarray, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, action: np.ndarray, observation_space: gym.spaces.Space, action_space: gym.spaces.Space):
+        super().__init__(observation_space, action_space)
         self._action = action
 
     def memorize(self, timestep: TimeStep, next_timestep: TimeStep):

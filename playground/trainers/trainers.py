@@ -25,12 +25,13 @@ class Trainer:
         self.agent = agent
         self.arguments = arguments
 
-        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        exp_id = (
-            f"{self.arguments.env.task.replace('/', '_')}_{now}"
+        prefix = (
+            f"{self.arguments.env.task.replace('/', '-')}"
             if self.arguments.logging.exp_id is None
-            else f"{self.arguments.logging.exp_id}_{now}"
+            else f"{self.arguments.logging.exp_id}"
         )
+        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        exp_id = self.arguments.agent.class_name + "_" + prefix + "_" + now
 
         self.exp_id = exp_id
         self.exp_dir = f"{config.EXP_ROOT_DIR}/{exp_id}"
@@ -124,7 +125,7 @@ class Trainer:
                     self.train_step += 1
                     pbar.update()
 
-                    # Compute actions
+                    # Compute action
                     if seed_until_step(self.train_step):
                         action = self.agent.act(observation=timestep.observation, random=True)
                     else:
@@ -142,7 +143,7 @@ class Trainer:
                     # Memorize step
                     self.agent.memorize(prev_timestep, timestep)
 
-                    # Improve agents
+                    # Improve agent
                     if not seed_until_step(self.train_step) and update_every_step(self.train_step):
                         for _ in range(self.arguments.trainer.num_updates):
                             metrics = self.agent.improve(
@@ -150,7 +151,7 @@ class Trainer:
                             )
                         wandb.log(metrics, step=self.train_step)
 
-                    # Compute agent returns
+                    # Compute agent return
                     agent_return += timestep.reward
 
                     # Record step
@@ -176,5 +177,6 @@ class Trainer:
                 # Start evaluation
                 if eval_scheduled or self.train_step >= self.arguments.trainer.num_train_steps:
                     self.eval()
-                    self.save()
+                    if self.arguments.logging.save_agent_snapshots:
+                        self.save()
                     eval_scheduled = False

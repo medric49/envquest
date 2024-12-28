@@ -1,13 +1,15 @@
 import gymnasium as gym
 
 import playground as pg
-from playground.arguments import TrainerArguments, TrainingArguments, SarsaAgentArguments
+from playground.arguments import TrainerArguments, TrainingArguments, SarsaAgentArguments, LoggingArguments
 
 
 def main():
     # Training arguments
     arguments = TrainingArguments(
-        trainer=TrainerArguments(batch_size=1, num_updates=1, update_every_steps=1), agent=SarsaAgentArguments()
+        trainer=TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
+        agent=SarsaAgentArguments(),
+        logging=LoggingArguments(save_agent_snapshots=False),
     )
 
     # Define environment
@@ -15,8 +17,14 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = pg.agents.dqn.DiscreteQNetAgent(
-            observation_space=env.observation_space, action_space=env.action_space, **arguments.agent.__dict__
+        agent = pg.agents.sarsa.DiscreteSarsaAgent(
+            discount=arguments.agent.discount,
+            lr=arguments.agent.lr,
+            eps_start=arguments.agent.eps_start,
+            eps_end=arguments.agent.eps_end,
+            eps_step_duration=arguments.agent.eps_step_duration,
+            observation_space=env.observation_space,
+            action_space=env.action_space,
         )
     else:
         raise ValueError(

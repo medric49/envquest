@@ -12,7 +12,6 @@ from playground.memories.sarsa import SarsaAgentMemory
 class DiscreteSarsaAgent(Agent):
     def __init__(
         self,
-        mem_capacity: int,
         discount: float,
         lr: float,
         eps_start: float,
@@ -23,7 +22,7 @@ class DiscreteSarsaAgent(Agent):
     ):
         super().__init__(observation_space, action_space)
 
-        self.memory = SarsaAgentMemory(mem_capacity, discount)
+        self.memory = SarsaAgentMemory()
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
@@ -68,14 +67,12 @@ class DiscreteSarsaAgent(Agent):
             action = np.asarray(action, dtype=np.int64)
         return action
 
-    def improve(self, batch_size: int = None, **kwargs) -> dict:
-        if batch_size is None:
-            raise ValueError("batch_size is required")
+    def improve(self, **kwargs) -> dict:
 
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_action, next_obs_terminal = self.memory.sample(size=batch_size)
+        obs, action, reward, next_obs, next_action, next_obs_terminal = self.memory.sample()
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())

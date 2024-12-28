@@ -16,16 +16,17 @@ class LoggingArguments:
     save_train_videos: bool = False
     log_eval_videos: bool = True
     save_eval_videos: bool = True
+    save_agent_snapshots: bool = True
 
 
 @dataclass
 class TrainerArguments:
     # Training
-    batch_size: int = 128
+    batch_size: int = 256
     num_train_steps: int = 100000
     num_seed_steps: int = 5000
     num_updates: int = 2
-    update_every_steps: int = 8
+    update_every_steps: int = 4
 
     # Evaluation
     num_eval_episodes: int = 5
@@ -34,7 +35,7 @@ class TrainerArguments:
 
 @dataclass
 class AgentArguments:
-    mem_capacity: int = 100000
+    class_name: str = None
     discount: float = 0.99
     lr: float = 1e-3
     eps_start: float = 0.95
@@ -42,12 +43,16 @@ class AgentArguments:
     eps_step_duration: int = 50000
 
 
+@dataclass
 class DQNAgentArguments(AgentArguments):
+    class_name: str = "dqn"
     tau: float = 0.005
+    mem_capacity: int = 100000
 
 
+@dataclass
 class SarsaAgentArguments(AgentArguments):
-    pass
+    class_name: str = "sarsa"
 
 
 @dataclass

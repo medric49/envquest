@@ -39,11 +39,21 @@ python -m scripts.run_random_agent
 
 Read the python script for more information: [scripts/run_random_agent.py](scripts/run_random_agent.py)
 
-### Train a DQN Agent
+### Train Agents
 
+#### DQN Agent
 Train a DQN policy agent in a Gym environment
 ```shell
 python -m scripts.train_dqn
 ```
 
 Read the python script for more information: [scripts/train_dqn.py](scripts/train_dqn.py)
+
+
+#### Sarsa Agent
+Train a Sarsa policy agent in a Gym environment
+```shell
+python -m scripts.train_sarsa
+```
+
+Read the python script for more information: [scripts/train_sarsa.py](scripts/train_sarsa.py)
