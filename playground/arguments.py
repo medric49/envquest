@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from playground.agents.common import EpsilonDecay
+
 
 @dataclass
 class EnvArguments:
@@ -37,15 +39,17 @@ class TrainerArguments:
 class AgentArguments:
     class_name: str = None
     discount: float = 0.99
-    lr: float = 1e-3
+    lr: float = 1e-4
     eps_start: float = 0.95
     eps_end: float = 0.05
-    eps_step_duration: int = 25000
+    eps_step_duration: int = 100000
+    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
 class DQNAgentArguments(AgentArguments):
     class_name: str = "dqn"
+    n_steps: int = 6
     tau: float = 0.005
     mem_capacity: int = 1000000
 

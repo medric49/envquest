@@ -6,9 +6,11 @@ from playground.memories.common import AgentMemory
 
 
 class DQNAgentMemory(AgentMemory):
-    def __init__(self, capacity: int, discount: float):
+    def __init__(self, capacity: int, discount: float, n_steps: int):
         self.discount = discount
         self.capacity = capacity
+        self.n_steps = n_steps
+        self._max_offset = 0
 
         self.observations = None
         self.actions = None
@@ -25,10 +27,11 @@ class DQNAgentMemory(AgentMemory):
         self.next_observations = deque(maxlen=self.capacity)
         self.next_step_terminal = deque(maxlen=self.capacity)
 
-        self.first_step_indices = deque(maxlen=self.capacity)
-        self.last_step_indices = deque(maxlen=self.capacity)
-
     def push(self, timestep: TimeStep, next_timestep: TimeStep):
+        if timestep.first():
+            self._max_offset = 0
+        else:
+            self._max_offset = min(self._max_offset + 1, self.n_steps - 1)
         observation = timestep.observation
         action = next_timestep.action
         reward = next_timestep.reward
@@ -41,15 +44,14 @@ class DQNAgentMemory(AgentMemory):
         self.next_observations.append(next_observation)
         self.next_step_terminal.append(next_step_terminal)
 
-        self.first_step_indices.append(1 if timestep.first() else 0)
-        self.last_step_indices.append(1 if next_timestep.last() else 0)
+        for offset in range(self._max_offset, 0, -1):
+            index = len(self.rewards) - offset
+            self.rewards[index] += (self.discount**offset) * reward
 
     def __len__(self):
         return len(self.observations)
 
-    def sample(
-        self, size: int = None, **kwargs
-    ) -> tuple[np.ndarray, ...]:
+    def sample(self, size: int = None, **kwargs) -> tuple[np.ndarray, ...]:
         if size is None:
             raise ValueError("size is required")
 

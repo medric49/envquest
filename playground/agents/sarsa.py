@@ -17,6 +17,7 @@ class DiscreteSarsaAgent(Agent):
         eps_start: float,
         eps_end: float,
         eps_step_duration: int,
+        eps_decay: str,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
@@ -35,11 +36,16 @@ class DiscreteSarsaAgent(Agent):
         self.eps_start = eps_start
         self.eps_end = eps_end
         self.eps_step_duration = eps_step_duration
+        self.eps_decay = eps_decay
 
     @property
     def current_noise(self):
-        # mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        if self.eps_decay == "linear":
+            mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
+        elif self.eps_decay == "exponential":
+            mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        else:
+            raise ValueError("Invalid value for 'eps_decay'")
         noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
         return noise
 

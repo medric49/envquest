@@ -5,6 +5,11 @@ import numpy as np
 from playground.envs.common import TimeStep
 
 
+class EpsilonDecay:
+    LINERA = "linear"
+    EXPONENTIAL = "exponential"
+
+
 class Agent(metaclass=abc.ABCMeta):
     def __init__(
         self,

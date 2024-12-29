@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from pathlib import Path
 from datetime import datetime
 
@@ -100,7 +101,7 @@ class Trainer:
         wandb.log_artifact(wandb_artifact, aliases=["latest", f"step_{self.train_step}"])
 
     def train(self):
-        wandb.init(project=self.arguments.logging.project_name, name=self.exp_id)
+        wandb.init(project=self.arguments.logging.project_name, name=self.exp_id, config=asdict(self.arguments))
 
         update_every_step = utils.Every(self.arguments.trainer.update_every_steps)
         eval_every_step = utils.Every(self.arguments.trainer.eval_every_steps)

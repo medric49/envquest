@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from playground import utils
-from playground.agents.common import Agent
+from playground.agents.common import Agent, EpsilonDecay
 from playground.functions.discrete_qnet import DiscreteQNet
 from playground.utils import init_weights
 from playground.envs.common import TimeStep
@@ -15,17 +15,19 @@ class DiscreteQNetAgent(Agent):
         self,
         mem_capacity: int,
         discount: float,
+        n_steps: int,
         lr: float,
         tau: float,
         eps_start: float,
         eps_end: float,
         eps_step_duration: int,
+        eps_decay: str,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
         super().__init__(observation_space=observation_space, action_space=action_space)
 
-        self.memory = DQNAgentMemory(mem_capacity, discount)
+        self.memory = DQNAgentMemory(mem_capacity, discount, n_steps=n_steps)
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
@@ -35,17 +37,23 @@ class DiscreteQNetAgent(Agent):
         self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=lr)
         self.criterion = torch.nn.MSELoss()
         self.discount = discount
+        self.n_steps = n_steps
         self.tau = tau
 
         self.step_count = 0
         self.eps_start = eps_start
         self.eps_end = eps_end
         self.eps_step_duration = eps_step_duration
+        self.eps_decay = eps_decay
 
     @property
     def current_noise(self):
-        # mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        if self.eps_decay == EpsilonDecay.LINERA:
+            mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
+        elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
+            mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        else:
+            raise ValueError("Invalid value for 'eps_decay'")
         noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
         return noise
 
@@ -95,7 +103,7 @@ class DiscreteQNetAgent(Agent):
             next_value = (self.target_q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()) * (
                 1.0 - next_obs_terminal
             )
-        target = reward + self.discount * next_value
+        target = reward + (self.discount**self.n_steps) * next_value
 
         self.q_net.train()
         self.optimizer.zero_grad()
