@@ -16,9 +16,6 @@ class DQNAgentMemory(AgentMemory):
         self.next_observations = None
         self.next_step_terminal = None
 
-        self.first_step_indices = None
-        self.last_step_indices = None
-
         self.initialize()
 
     def initialize(self):
@@ -51,18 +48,13 @@ class DQNAgentMemory(AgentMemory):
         return len(self.observations)
 
     def sample(
-        self, size: int = None, recent=False, exclude_first_steps=False, exclude_last_steps=False, **kwargs
+        self, size: int = None, **kwargs
     ) -> tuple[np.ndarray, ...]:
         if size is None:
             raise ValueError("size is required")
 
         indices = np.arange(len(self), dtype=np.int32)
-        if exclude_first_steps:
-            indices = indices[~np.asarray(self.first_step_indices, dtype=np.bool)]
-        if exclude_last_steps:
-            indices = indices[~np.asarray(self.last_step_indices, dtype=np.bool)]
-        if not recent:
-            indices = np.random.choice(indices, size=indices.shape[0], replace=False)
+        indices = np.random.choice(indices, size=indices.shape[0], replace=False)
         indices = indices[-size:]
 
         observations = np.stack(self.observations)[indices]
