@@ -1,24 +1,23 @@
 [project]
 name = "playground"
 version = "0.1.0"
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dependencies = [
     "fire>=0.7.0",
     "gymnasium[box2d]>=1.0.0",
-    "imageio[ffmpeg,pyav]>=2.36.1",
+    "imageio[ffmpeg,pyav]>=2.35.1",
     "opencv-python>=4.10.0.84",
-    "pillow>=11.0.0",
+    "pillow>=10.4.0",
     "torch>=2.5.1",
     "tqdm>=4.67.1",
-    "tyro>=0.9.5",
     "wandb[media]>=0.19.1",
 ]
 
 [dependency-groups]
 dev = [
-    "black>=24.10.0",
+    "black>=24.8.0",
     "jupyter>=1.1.1",
-    "pylint>=3.3.2",
+    "pylint>=3.2.7",
 ]
 
 [tool.uv]

@@ -1,4 +1,4 @@
-# playground
+# Playground
 Play with reinforcement learning algorithms.
 
 ## Requirements
