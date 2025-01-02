@@ -11,7 +11,7 @@ class EnvArguments:
 
 @dataclass
 class LoggingArguments:
-    project_name: str = "rlstudio"
+    project_name: str = "envquest"
     exp_id: str = None
     render_width: int = 256
     render_height: int = 256

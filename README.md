@@ -1,4 +1,4 @@
-# RL Studio
+# EnvQuest
 Play with reinforcement learning algorithms.
 
 ## Requirements
@@ -15,7 +15,6 @@ brew install ffmpeg
 
 
 ## Installation
-
 Install the python dependencies
 ```shell
 uv venv .venv

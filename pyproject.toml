@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "envquest"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
     {name = "Medric Sonwa", email="medric49@gmail.com"}
 ]
@@ -29,8 +29,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/medric49/rlstudio"
-Issues = "https://github.com/medric49/rlstudio/issues"
+Homepage = "https://github.com/medric49/envquest"
+Issues = "https://github.com/medric49/envquest/issues"
 
 
 [dependency-groups]
