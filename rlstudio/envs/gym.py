@@ -4,8 +4,8 @@ import numpy as np
 import gymnasium as gym
 from PIL import Image
 
-from playground.envs.common import Environment, TimeStep, StepType
-from playground.envs.wrappers import MaxEpisodeLengthWrapper
+from rlstudio.envs.common import Environment, TimeStep, StepType
+from rlstudio.envs.wrappers import MaxEpisodeLengthWrapper
 
 
 class GymEnvironment(Environment, abc.ABC):

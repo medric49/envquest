@@ -2,24 +2,23 @@ from dataclasses import asdict
 
 import gymnasium as gym
 
-import playground as pg
-from playground.arguments import TrainerArguments, TrainingArguments, SarsaAgentArguments, LoggingArguments
+import rlstudio as rls
 
 
 def main():
     # Training arguments
-    arguments = TrainingArguments(
-        trainer=TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
-        agent=SarsaAgentArguments(),
-        logging=LoggingArguments(save_agent_snapshots=False),
+    arguments = rls.arguments.TrainingArguments(
+        trainer=rls.arguments.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
+        agent=rls.arguments.SarsaAgentArguments(),
+        logging=rls.arguments.LoggingArguments(save_agent_snapshots=False),
     )
 
     # Define environment
-    env = pg.envs.gym.make_env(**asdict(arguments.env))
+    env = rls.envs.gym.make_env(**asdict(arguments.env))
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = pg.agents.sarsa.DiscreteSarsaAgent(
+        agent = rls.agents.sarsa.DiscreteSarsaAgent(
             discount=arguments.agent.discount,
             lr=arguments.agent.lr,
             eps_start=arguments.agent.eps_start,
@@ -35,7 +34,7 @@ def main():
         )
 
     # Define trainer
-    trainer = pg.trainers.Trainer(env, agent, arguments)
+    trainer = rls.trainers.Trainer(env, agent, arguments)
 
     # Start training
     trainer.train()

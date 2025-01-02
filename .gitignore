@@ -1,7 +1,10 @@
 .idea
+.vscode
 .venv
 ~*
 __pycache__
 .exp
 wandb
+dist
 .DS_Store
+.env

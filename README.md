@@ -1,10 +1,9 @@
-# Playground
+# RL Studio
 Play with reinforcement learning algorithms.
 
 ## Requirements
-
 You need these requirements to run the project:
-* python >= 3.9
+* python >= 3.8
 * [uv](https://docs.astral.sh/uv/getting-started/installation/)
 * ffmpeg
 ```shell

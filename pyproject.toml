@@ -1,7 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "playground"
-version = "0.1.0"
+name = "rlstudio"
+version = "0.0.1"
+authors = [
+    {name = "Medric Sonwa", email="medric49@gmail.com"}
+]
+description = "A collection of Reinforcement Learning algorithms to train autonomous agents in different environments."
+readme = "README.md"
 requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
 dependencies = [
     "fire>=0.7.0",
     "gymnasium[box2d]>=1.0.0",
@@ -13,12 +28,23 @@ dependencies = [
     "wandb[media]>=0.19.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/medric49/rlstudio"
+Issues = "https://github.com/medric49/rlstudio/issues"
+
+
 [dependency-groups]
 dev = [
     "black>=24.8.0",
+    "build>=1.2.2.post1",
     "jupyter>=1.1.1",
     "pylint>=3.2.7",
+    "twine>=6.0.1",
 ]
+
+[tool.setuptools]
+packages = ["rlstudio"]
+
 
 [tool.uv]
 native-tls = true

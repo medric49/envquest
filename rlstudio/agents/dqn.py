@@ -2,12 +2,11 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-from playground import utils
-from playground.agents.common import Agent, EpsilonDecay
-from playground.functions.discrete_qnet import DiscreteQNet
-from playground.utils import init_weights
-from playground.envs.common import TimeStep
-from playground.memories.dqn import DQNAgentMemory
+from rlstudio import utils
+from rlstudio.agents.common import Agent, EpsilonDecay
+from rlstudio.envs.common import TimeStep
+from rlstudio.functions.discrete_qnet import DiscreteQNet
+from rlstudio.memories.dqn import DQNAgentMemory
 
 
 class DiscreteQNetAgent(Agent):
@@ -32,7 +31,7 @@ class DiscreteQNetAgent(Agent):
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
         self.target_q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
-        self.q_net.apply(init_weights)
+        self.q_net.apply(utils.init_weights)
         self.target_q_net.load_state_dict(self.q_net.state_dict())
         self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=lr)
         self.criterion = torch.nn.MSELoss()

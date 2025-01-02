@@ -8,11 +8,11 @@ from tqdm import tqdm
 
 import wandb
 
-from playground import config, utils
-from playground.agents.common import Agent
-from playground.arguments import TrainingArguments
-from playground.envs.common import Environment
-from playground.recorders import EpisodeRecorder
+from rlstudio import config, utils
+from rlstudio.agents.common import Agent
+from rlstudio.arguments import TrainingArguments
+from rlstudio.envs.common import Environment
+from rlstudio.recorders import EpisodeRecorder
 
 
 class Trainer:

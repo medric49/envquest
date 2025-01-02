@@ -2,11 +2,11 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-from playground import utils
-from playground.agents.common import Agent
-from playground.envs.common import TimeStep
-from playground.functions.discrete_qnet import DiscreteQNet
-from playground.memories.sarsa import SarsaAgentMemory
+from rlstudio import utils
+from rlstudio.agents.common import Agent
+from rlstudio.envs.common import TimeStep
+from rlstudio.functions.discrete_qnet import DiscreteQNet
+from rlstudio.memories.sarsa import SarsaAgentMemory
 
 
 class DiscreteSarsaAgent(Agent):

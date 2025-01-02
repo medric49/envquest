@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from playground.agents.common import EpsilonDecay
+from rlstudio.agents.common import EpsilonDecay
 
 
 @dataclass
@@ -11,7 +11,7 @@ class EnvArguments:
 
 @dataclass
 class LoggingArguments:
-    project_name: str = "playground"
+    project_name: str = "rlstudio"
     exp_id: str = None
     render_width: int = 256
     render_height: int = 256

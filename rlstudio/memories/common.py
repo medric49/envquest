@@ -2,7 +2,7 @@ import abc
 
 import numpy as np
 
-from playground.envs.common import TimeStep
+from rlstudio.envs.common import TimeStep
 
 
 class AgentMemory(metaclass=abc.ABCMeta):

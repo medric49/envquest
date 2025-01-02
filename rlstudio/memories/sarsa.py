@@ -1,8 +1,8 @@
 from collections import deque
 import numpy as np
 
-from playground.envs.common import TimeStep
-from playground.memories.common import AgentMemory
+from rlstudio.envs.common import TimeStep
+from rlstudio.memories.common import AgentMemory
 
 
 class SarsaAgentMemory(AgentMemory):

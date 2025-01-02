@@ -2,8 +2,8 @@ import numpy as np
 
 import gymnasium as gym
 
-from playground.agents.common import Agent
-from playground.envs.common import TimeStep
+from rlstudio.agents.common import Agent
+from rlstudio.envs.common import TimeStep
 
 
 class OneActionAgent(Agent):
