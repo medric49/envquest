@@ -11,7 +11,7 @@ def update_version(version):
     data["project"]["version"] = version
 
     with open(file_path, "w", encoding="utf-8") as f:
-        toml.dump(data, f, toml.encoder.TomlPreserveCommentEncoder())
+        toml.dump(data, f)
 
 
 if __name__ == "__main__":
