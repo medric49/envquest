@@ -1,1 +1,1 @@
-from . import primitives, dqn, sarsa
+from . import simple, dqn, sarsa

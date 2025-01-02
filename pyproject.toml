@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "envquest"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
     {name = "Medric Sonwa", email="medric49@gmail.com"}
 ]
@@ -42,8 +42,10 @@ dev = [
     "twine>=6.0.1",
 ]
 
-[tool.setuptools]
-packages = ["envquest"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["envquest*"]
+namespaces = false
 
 
 [tool.uv]
