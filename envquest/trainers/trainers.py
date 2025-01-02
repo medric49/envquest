@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 import wandb
 
-from envquest import config, utils
+from envquest import utils
 from envquest.agents.common import Agent
 from envquest.arguments import TrainingArguments
 from envquest.envs.common import Environment
@@ -16,12 +16,7 @@ from envquest.recorders import EpisodeRecorder
 
 
 class Trainer:
-    def __init__(
-        self,
-        env: Environment,
-        agent: Agent,
-        arguments: TrainingArguments,
-    ):
+    def __init__(self, env: Environment, agent: Agent, arguments: TrainingArguments, output_dir=".exp"):
         self.env = env
         self.agent = agent
         self.arguments = arguments
@@ -35,7 +30,7 @@ class Trainer:
         exp_id = self.arguments.agent.class_name + "_" + prefix + "_" + now
 
         self.exp_id = exp_id
-        self.exp_dir = f"{config.EXP_ROOT_DIR}/{exp_id}"
+        self.exp_dir = f"{output_dir}/{exp_id}"
         Path(self.exp_dir).mkdir(parents=True)
 
         self.train_recorder = EpisodeRecorder(f"{self.exp_dir}/train_video")
