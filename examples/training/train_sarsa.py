@@ -2,23 +2,23 @@ from dataclasses import asdict
 
 import gymnasium as gym
 
-import envquest as eq
+from envquest import arguments as args, envs, agents, trainers
 
 
 def main():
     # Training arguments
-    arguments = eq.arguments.TrainingArguments(
-        trainer=eq.arguments.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
-        agent=eq.arguments.SarsaAgentArguments(),
-        logging=eq.arguments.LoggingArguments(save_agent_snapshots=False),
+    arguments = args.TrainingArguments(
+        trainer=args.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
+        agent=args.SarsaAgentArguments(),
+        logging=args.LoggingArguments(save_agent_snapshots=False),
     )
 
     # Define environment
-    env = eq.envs.gym.make_env(**asdict(arguments.env))
+    env = envs.gym.make_env(**asdict(arguments.env))
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = eq.agents.sarsa.DiscreteSarsaAgent(
+        agent = agents.sarsa.DiscreteSarsaAgent(
             discount=arguments.agent.discount,
             lr=arguments.agent.lr,
             eps_start=arguments.agent.eps_start,
@@ -34,7 +34,7 @@ def main():
         )
 
     # Define trainer
-    trainer = eq.trainers.Trainer(env, agent, arguments)
+    trainer = trainers.Trainer(env, agent, arguments)
 
     # Start training
     trainer.train()

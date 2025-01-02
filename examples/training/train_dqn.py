@@ -2,21 +2,21 @@ from dataclasses import asdict
 
 import gymnasium as gym
 
-import envquest as eq
+from envquest import arguments as args, envs, agents, trainers
 
 
 def main():
     # Training arguments
-    arguments = eq.arguments.TrainingArguments(
-        agent=eq.arguments.DQNAgentArguments(), logging=eq.arguments.LoggingArguments(save_agent_snapshots=False)
+    arguments = args.TrainingArguments(
+        agent=args.DQNAgentArguments(), logging=args.LoggingArguments(save_agent_snapshots=False)
     )
 
     # Define environment
-    env = eq.envs.gym.make_env(**asdict(arguments.env))
+    env = envs.gym.make_env(**asdict(arguments.env))
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = eq.agents.dqn.DiscreteQNetAgent(
+        agent = agents.dqn.DiscreteQNetAgent(
             mem_capacity=arguments.agent.mem_capacity,
             discount=arguments.agent.discount,
             n_steps=arguments.agent.n_steps,
@@ -35,7 +35,7 @@ def main():
         )
 
     # Define trainer
-    trainer = eq.trainers.Trainer(env, agent, arguments)
+    trainer = trainers.Trainer(env, agent, arguments)
 
     # Start training
     trainer.train()

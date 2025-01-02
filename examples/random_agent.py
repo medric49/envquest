@@ -4,12 +4,12 @@ import cv2
 import fire
 import numpy as np
 
-import envquest as eq
+from envquest import envs, agents
 
 
 def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
-    env = eq.envs.gym.make_env(env_name)
-    agent = eq.agents.simple.RandomAgent(env.observation_space, env.action_space)
+    env = envs.gym.make_env(env_name)
+    agent = agents.simple.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()
     while not timestep.last():
