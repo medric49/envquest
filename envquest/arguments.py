@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from rlstudio.agents.common import EpsilonDecay
+from envquest.agents.common import EpsilonDecay
 
 
 @dataclass

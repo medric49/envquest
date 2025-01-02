@@ -2,21 +2,18 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-from rlstudio import utils
-from rlstudio.agents.common import Agent, EpsilonDecay
-from rlstudio.envs.common import TimeStep
-from rlstudio.functions.discrete_qnet import DiscreteQNet
-from rlstudio.memories.dqn import DQNAgentMemory
+from envquest import utils
+from envquest.agents.common import Agent
+from envquest.envs.common import TimeStep
+from envquest.functions.discrete_qnet import DiscreteQNet
+from envquest.memories.sarsa import SarsaAgentMemory
 
 
-class DiscreteQNetAgent(Agent):
+class DiscreteSarsaAgent(Agent):
     def __init__(
         self,
-        mem_capacity: int,
         discount: float,
-        n_steps: int,
         lr: float,
-        tau: float,
         eps_start: float,
         eps_end: float,
         eps_step_duration: int,
@@ -24,20 +21,16 @@ class DiscreteQNetAgent(Agent):
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
-        super().__init__(observation_space=observation_space, action_space=action_space)
+        super().__init__(observation_space, action_space)
 
-        self.memory = DQNAgentMemory(mem_capacity, discount, n_steps=n_steps)
+        self.memory = SarsaAgentMemory()
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
-        self.target_q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())
-        self.q_net.apply(utils.init_weights)
-        self.target_q_net.load_state_dict(self.q_net.state_dict())
+
         self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=lr)
         self.criterion = torch.nn.MSELoss()
         self.discount = discount
-        self.n_steps = n_steps
-        self.tau = tau
 
         self.step_count = 0
         self.eps_start = eps_start
@@ -47,9 +40,9 @@ class DiscreteQNetAgent(Agent):
 
     @property
     def current_noise(self):
-        if self.eps_decay == EpsilonDecay.LINERA:
+        if self.eps_decay == "linear":
             mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
+        elif self.eps_decay == "exponential":
             mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
         else:
             raise ValueError("Invalid value for 'eps_decay'")
@@ -80,29 +73,25 @@ class DiscreteQNetAgent(Agent):
             action = np.asarray(action, dtype=np.int64)
         return action
 
-    def improve(self, batch_size: int = None, **kwargs) -> dict:
-        if batch_size is None:
-            raise ValueError("batch_size is required")
+    def improve(self, **kwargs) -> dict:
 
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size)
-        obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
-        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        obs, action, reward, next_obs, next_action, next_obs_terminal = self.memory.sample()
 
+        obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
         reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        next_action = torch.tensor(next_action, dtype=torch.int64, device=utils.device())
         next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.q_net.eval()
-        self.target_q_net.eval()
         with torch.no_grad():
-            next_action = self.q_net(next_obs).max(dim=1)[1].to(dtype=torch.int64)
-            next_value = (self.target_q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()) * (
-                1.0 - next_obs_terminal
-            )
-        target = reward + (self.discount**self.n_steps) * next_value
+            next_value = self.q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()
+            next_value = next_value * (1.0 - next_obs_terminal)
+        target = reward + self.discount * next_value
 
         self.q_net.train()
         self.optimizer.zero_grad()
@@ -112,12 +101,6 @@ class DiscreteQNetAgent(Agent):
         loss = self.criterion(value, target)
         loss.backward()
         self.optimizer.step()
-
-        target_state_dict = self.target_q_net.state_dict()
-        source_state_dict = self.q_net.state_dict()
-        for key in source_state_dict:
-            target_state_dict[key] = source_state_dict[key] * self.tau + target_state_dict[key] * (1 - self.tau)
-        self.target_q_net.load_state_dict(target_state_dict)
 
         return {
             "train/batch/reward": reward.mean().item(),

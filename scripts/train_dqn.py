@@ -2,21 +2,21 @@ from dataclasses import asdict
 
 import gymnasium as gym
 
-import rlstudio as rls
+import envquest as eq
 
 
 def main():
     # Training arguments
-    arguments = rls.arguments.TrainingArguments(
-        agent=rls.arguments.DQNAgentArguments(), logging=rls.arguments.LoggingArguments(save_agent_snapshots=False)
+    arguments = eq.arguments.TrainingArguments(
+        agent=eq.arguments.DQNAgentArguments(), logging=eq.arguments.LoggingArguments(save_agent_snapshots=False)
     )
 
     # Define environment
-    env = rls.envs.gym.make_env(**asdict(arguments.env))
+    env = eq.envs.gym.make_env(**asdict(arguments.env))
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = rls.agents.dqn.DiscreteQNetAgent(
+        agent = eq.agents.dqn.DiscreteQNetAgent(
             mem_capacity=arguments.agent.mem_capacity,
             discount=arguments.agent.discount,
             n_steps=arguments.agent.n_steps,
@@ -35,7 +35,7 @@ def main():
         )
 
     # Define trainer
-    trainer = rls.trainers.Trainer(env, agent, arguments)
+    trainer = eq.trainers.Trainer(env, agent, arguments)
 
     # Start training
     trainer.train()

@@ -2,7 +2,7 @@ import gymnasium as gym
 import numpy as np
 from PIL import Image
 
-from rlstudio.envs.common import Wrapper, TimeStep, StepType
+from envquest.envs.common import Wrapper, TimeStep, StepType
 
 
 class MaxEpisodeLengthWrapper(Wrapper):

@@ -2,7 +2,7 @@ import abc
 import gymnasium as gym
 import numpy as np
 
-from rlstudio.envs.common import TimeStep
+from envquest.envs.common import TimeStep
 
 
 class EpsilonDecay:

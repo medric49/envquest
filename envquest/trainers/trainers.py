@@ -8,11 +8,11 @@ from tqdm import tqdm
 
 import wandb
 
-from rlstudio import config, utils
-from rlstudio.agents.common import Agent
-from rlstudio.arguments import TrainingArguments
-from rlstudio.envs.common import Environment
-from rlstudio.recorders import EpisodeRecorder
+from envquest import config, utils
+from envquest.agents.common import Agent
+from envquest.arguments import TrainingArguments
+from envquest.envs.common import Environment
+from envquest.recorders import EpisodeRecorder
 
 
 class Trainer:

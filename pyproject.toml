@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rlstudio"
+name = "envquest"
 version = "0.0.1"
 authors = [
     {name = "Medric Sonwa", email="medric49@gmail.com"}
@@ -43,7 +43,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["rlstudio"]
+packages = ["envquest"]
 
 
 [tool.uv]
