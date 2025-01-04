@@ -12,7 +12,7 @@ def main():
     )
 
     # Define environment
-    env = envs.gym.make_env(**asdict(args.env))
+    env = envs.gym.GymEnvironment.from_task(**asdict(args.env))
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
