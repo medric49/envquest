@@ -8,7 +8,7 @@ from envquest import envs, agents
 
 
 def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
-    env = envs.gym.make_env(env_name)
+    env = envs.gym.GymEnvironment.from_task(env_name)
     agent = agents.simple.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()

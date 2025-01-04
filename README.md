@@ -11,7 +11,7 @@ To install the EnvQuest library, use `pip install envquest`.
 from envquest import envs, agents
 
 # Instantiate an environment
-env = envs.gym.make_env("LunarLander-v3")
+env = envs.gym.GymEnvironment.from_task("LunarLander-v3")
 
 # Instantiate an agent
 agent = agents.simple.RandomAgent(env.observation_space, env.action_space)
@@ -51,7 +51,7 @@ args = arguments.TrainingArguments(
 )
 
 # Instantiate an environment
-env = envs.gym.make_env(task=args.env.task, max_episode_length=args.env.max_episode_length)
+env = envs.gym.GymEnvironment.from_task(task=args.env.task, max_episode_length=args.env.max_episode_length)
 
 # Instantiate a DQN Agent
 agent = agents.dqn.DiscreteQNetAgent(
