@@ -1,6 +1,6 @@
 import abc
 import enum
-from typing import NamedTuple
+from typing import NamedTuple, Union
 import numpy as np
 import gymnasium as gym
 from PIL import Image
@@ -16,7 +16,7 @@ class TimeStep(NamedTuple):
     step_type: StepType
     truncated: bool
     observation: np.ndarray  # o_{t}
-    action: np.ndarray | None  # a_{t-1}
+    action: Union[np.ndarray, None]  # a_{t-1}
     reward: np.ndarray  # r_{t}
 
     def first(self):
@@ -57,7 +57,12 @@ class Environment(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def render(self, im_w: int, im_h: int) -> Image:
+    def render(self, im_w: int, im_h: int) -> Union[Image.Image, None]:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def is_renderable(self):
         pass
 
 
@@ -68,6 +73,10 @@ class Wrapper(Environment, abc.ABC):
     @property
     def episode_length(self) -> int:
         return self._env.episode_length
+
+    @property
+    def is_renderable(self):
+        return self._env.is_renderable
 
     def __getattr__(self, name):
         return getattr(self._env, name)

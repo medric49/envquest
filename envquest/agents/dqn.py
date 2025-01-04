@@ -82,7 +82,7 @@ class DiscreteQNetAgent(Agent):
 
     def improve(self, batch_size: int = None, **kwargs) -> dict:
         if batch_size is None:
-            raise ValueError("batch_size is required")
+            raise ValueError("'batch_size' is required")
 
         if len(self.memory) == 0:
             return {}

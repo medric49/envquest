@@ -53,7 +53,7 @@ class DQNAgentMemory(AgentMemory):
 
     def sample(self, size: int = None, **kwargs) -> tuple[np.ndarray, ...]:
         if size is None:
-            raise ValueError("size is required")
+            raise ValueError("'size' is required")
 
         indices = np.arange(len(self), dtype=np.int32)
         indices = np.random.choice(indices, size=indices.shape[0], replace=False)

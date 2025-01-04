@@ -1,4 +1,6 @@
 import abc
+import logging
+from typing import Union
 
 import numpy as np
 import gymnasium as gym
@@ -7,12 +9,17 @@ from PIL import Image
 from envquest.envs.common import Environment, TimeStep, StepType
 from envquest.envs.wrappers import MaxEpisodeLengthWrapper
 
+logger = logging.getLogger(__name__)
+
 
 class GymEnvironment(Environment, abc.ABC):
     def __init__(self, env: gym.Env):
         super().__init__()
         self._env = env
         self._episode_length = None
+
+        if self._env.render_mode != "rgb_array":
+            logger.info("The environment rendering mode is not 'rgb_array', the method .render() will return 'None'.")
 
     def reset(self) -> TimeStep:
         self._episode_length = 0
@@ -32,8 +39,14 @@ class GymEnvironment(Environment, abc.ABC):
     def observation_space(self) -> gym.spaces.Box:
         return self._env.observation_space
 
-    def render(self, im_w: int, im_h: int) -> Image:
+    def render(self, im_w: int, im_h: int) -> Union[Image.Image, None]:
+        if self._env.render_mode != "rgb_array":
+            return None
         return Image.fromarray(self._env.render()).resize((im_w, im_h))
+
+    @property
+    def is_renderable(self):
+        return self._env.render_mode == "rgb_array"
 
     @abc.abstractmethod
     def transform_action(self, action):
@@ -42,6 +55,28 @@ class GymEnvironment(Environment, abc.ABC):
     @property
     def episode_length(self) -> int:
         return self._episode_length
+
+    @staticmethod
+    def from_env(env: gym.Env, max_episode_length: int = None):
+
+        if not isinstance(env.observation_space, gym.spaces.Box):
+            raise TypeError(f"[{env.observation_space.__class__.__name__}] observation space not supported]")
+
+        if isinstance(env.action_space, gym.spaces.Discrete):
+            env = DiscreteGymEnvironment(env)
+        elif isinstance(env.action_space, gym.spaces.Box):
+            env = ContinuousGymEnvironment(env)
+        else:
+            raise TypeError(f"[{env.action_space.__class__.__name__}] action space not supported")
+
+        if max_episode_length is not None:
+            env = MaxEpisodeLengthWrapper(env, max_episode_length)
+        return env
+
+    @staticmethod
+    def from_task(task: str = "LunarLander-v3", max_episode_length: int = None):
+        env = gym.make(task, render_mode="rgb_array")
+        return GymEnvironment.from_env(env, max_episode_length)
 
 
 class DiscreteGymEnvironment(GymEnvironment):
@@ -74,22 +109,3 @@ class ContinuousGymEnvironment(GymEnvironment):
             shape=self._env.action_space.shape,
             dtype=np.float32,
         )
-
-
-def make_env(task: str = "LunarLander-v3", max_episode_length: int = None) -> GymEnvironment:
-    env = gym.make(task, render_mode="rgb_array")
-
-    if not isinstance(env.observation_space, gym.spaces.Box):
-        raise TypeError(f"[{env.observation_space.__class__.__name__}] observation space not supported]")
-
-    if isinstance(env.action_space, gym.spaces.Discrete):
-        env = DiscreteGymEnvironment(env)
-    elif isinstance(env.action_space, gym.spaces.Box):
-        env = ContinuousGymEnvironment(env)
-    else:
-        raise TypeError(f"[{env.action_space.__class__.__name__}] action space not supported")
-
-    if max_episode_length is not None:
-        env = MaxEpisodeLengthWrapper(env, max_episode_length)
-
-    return env

@@ -43,7 +43,7 @@ class Trainer:
         timestep = self.env.reset()
         agent_return = timestep.reward
 
-        if self.arguments.logging.save_eval_videos:
+        if self.arguments.logging.save_eval_videos and self.env.is_renderable:
             self.eval_recorder.start_recording(
                 self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
             )
@@ -54,11 +54,11 @@ class Trainer:
             timestep = self.env.step(action)
             agent_return += timestep.reward
 
-            if self.arguments.logging.save_eval_videos:
+            if self.arguments.logging.save_eval_videos and self.env.is_renderable:
                 self.eval_recorder.record(
                     self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
                 )
-        if self.arguments.logging.save_eval_videos:
+        if self.arguments.logging.save_eval_videos and self.env.is_renderable:
             frames = self.eval_recorder.save(video_name)
         return agent_return, frames
 
@@ -79,7 +79,7 @@ class Trainer:
         }
         wandb.log(metrics, step=self.train_step)
 
-        if self.arguments.logging.log_eval_videos and self.arguments.logging.save_eval_videos:
+        if self.arguments.logging.log_eval_videos and len(frames_list) > 0:
             frames_list = [np.asarray(frames, dtype=np.uint8).transpose((0, 3, 1, 2)) for frames in frames_list]
             frames_list = np.concatenate(frames_list)
             wandb.log({"eval/demo": wandb.Video(frames_list, fps=20)}, step=self.train_step)
@@ -112,7 +112,7 @@ class Trainer:
                 timestep = self.env.reset()
                 agent_return = timestep.reward
 
-                if self.arguments.logging.save_train_videos:
+                if self.arguments.logging.save_train_videos and self.env.is_renderable:
                     self.train_recorder.start_recording(
                         self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
                     )
@@ -151,7 +151,7 @@ class Trainer:
                     agent_return += timestep.reward
 
                     # Record step
-                    if self.arguments.logging.save_train_videos:
+                    if self.arguments.logging.save_train_videos and self.env.is_renderable:
                         self.train_recorder.record(
                             self.env.render(self.arguments.logging.render_width, self.arguments.logging.render_height)
                         )
@@ -161,7 +161,7 @@ class Trainer:
                         metrics = {"train/eps_length": self.env.episode_length, "train/return": agent_return}
                         wandb.log(metrics, step=self.train_step)
 
-                        if self.arguments.logging.save_train_videos:
+                        if self.arguments.logging.save_train_videos and self.env.is_renderable:
                             self.train_recorder.save(
                                 f"{self.train_episode}_{int(agent_return)}.mp4",
                             )
