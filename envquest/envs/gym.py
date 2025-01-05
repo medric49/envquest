@@ -60,7 +60,7 @@ class GymEnvironment(Environment, abc.ABC):
     def from_env(env: gym.Env, max_episode_length: int = None):
 
         if not isinstance(env.observation_space, gym.spaces.Box):
-            raise TypeError(f"[{env.observation_space.__class__.__name__}] observation space not supported]")
+            raise TypeError(f"[{env.observation_space.__class__.__name__}] observation space not supported")
 
         if isinstance(env.action_space, gym.spaces.Discrete):
             env = DiscreteGymEnvironment(env)
@@ -74,7 +74,7 @@ class GymEnvironment(Environment, abc.ABC):
         return env
 
     @staticmethod
-    def from_task(task: str = "LunarLander-v3", max_episode_length: int = None):
+    def from_task(task: str, max_episode_length: int = None):
         env = gym.make(task, render_mode="rgb_array")
         return GymEnvironment.from_env(env, max_episode_length)
 

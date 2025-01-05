@@ -28,6 +28,21 @@ while not timestep.last():
 frame = env.render(256, 256)
 ```
 
+### Usage with metaworld
+```python
+import metaworld
+import random
+
+from envquest import envs
+
+ml1 = metaworld.ML1("basketball-v2")
+task = random.choice(ml1.train_tasks)
+env = ml1.train_classes["basketball-v2"](render_mode="rgb_array")
+env.set_task(task)
+
+env = envs.gym.GymEnvironment.from_env(env)
+```
+
 ### Train a DQN Agent in a gym environment
 
 First, set up a WandB logging environment
