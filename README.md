@@ -14,7 +14,7 @@ from envquest import envs, agents
 env = envs.gym.GymEnvironment.from_task("LunarLander-v3")
 
 # Instantiate an agent
-agent = agents.simple_agents.RandomAgent(env.observation_space, env.action_space)
+agent = agents.generics.RandomAgent(env.observation_space, env.action_space)
 
 # Execute an MDP
 timestep = env.reset()

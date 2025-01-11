@@ -9,7 +9,7 @@ from envquest import envs, agents
 
 def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
     env = envs.gym.GymEnvironment.from_task(env_name)
-    agent = agents.simple_agents.RandomAgent(env.observation_space, env.action_space)
+    agent = agents.generics.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()
     while not timestep.last():

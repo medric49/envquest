@@ -17,7 +17,7 @@ def main(im_w=512, im_h=512, fps=30):
 
     env = envs.gym.GymEnvironment.from_env(env)
 
-    agent = agents.simple_agents.RandomAgent(env.observation_space, env.action_space)
+    agent = agents.generics.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()
     while not timestep.last():

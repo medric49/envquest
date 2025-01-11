@@ -1,1 +1,1 @@
-from . import simple_agents, dqn_agents, sarsa_agents, pg_agents
+from . import generics, dqn_agents, sarsa_agents, pg_agents
