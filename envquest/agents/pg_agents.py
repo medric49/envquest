@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 import gymnasium as gym
@@ -8,7 +10,7 @@ from envquest import utils
 from envquest.agents.common import Agent
 from envquest.envs.common import TimeStep
 from envquest.functions.policies import DiscretePolicyNet
-from envquest.memories.online_memories import OnlineMemory
+from envquest.memories.replay_memories import ReplayMemory
 
 
 class PGAgent(Agent):
@@ -22,14 +24,12 @@ class PGAgent(Agent):
     ):
         super().__init__(observation_space=observation_space, action_space=action_space)
 
-        self.memory = OnlineMemory(mem_capacity, discount)
-
+        self.memory = ReplayMemory(mem_capacity, discount, n_steps=math.inf)
         self.policy = DiscretePolicyNet(observation_space.shape[0], action_space.n).to(device=utils.device())
         self.policy.apply(utils.init_weights)
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
 
         self.temperature = 1
-
         self.last_policy_improvement_step = 0
         self.step_count = 0
 
@@ -54,13 +54,15 @@ class PGAgent(Agent):
                 action = np.asarray(action, dtype=np.int64)
         return action
 
+    @property
+    def policy_batch_size(self):
+        return self.step_count - self.last_policy_improvement_step
+
     def improve(self, **kwargs) -> dict:
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, _, _ = self.memory.sample(
-            size=self.step_count - self.last_policy_improvement_step, recent=True
-        )
+        obs, action, reward, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
@@ -69,12 +71,9 @@ class PGAgent(Agent):
         self.policy.train()
         self.optimizer.zero_grad()
         pred_action = self.policy(obs)
-        print(pred_action, pred_action.shape)
         pred_action_dist = distributions.Categorical(pred_action / self.temperature)
-        loss = -pred_action_dist.log_prob(action)
-        print(loss, loss.shape)
+        loss = -pred_action_dist.log_prob(action) * reward
         loss = loss.mean()
-
         loss.backward()
         self.optimizer.step()
 

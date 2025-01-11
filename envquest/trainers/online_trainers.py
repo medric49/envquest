@@ -1,7 +1,8 @@
 from dataclasses import asdict
 
-import wandb
+
 from tqdm import tqdm
+import wandb
 
 from envquest import utils
 from envquest.trainers.common import Trainer

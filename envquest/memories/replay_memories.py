@@ -1,14 +1,18 @@
+import math
 from collections import deque
+from typing import Union
+
 import numpy as np
 
 from envquest.envs.common import TimeStep
 from envquest.memories.common import AgentMemory
 
 
-class OnlineMemory(AgentMemory):
-    def __init__(self, capacity: int, discount: float):
+class ReplayMemory(AgentMemory):
+    def __init__(self, capacity: int, discount: float, n_steps: Union[int, float]):
         self.discount = discount
         self.capacity = capacity
+        self.n_steps = n_steps
         self._max_offset = 0
 
         self.observations = None
@@ -30,8 +34,7 @@ class OnlineMemory(AgentMemory):
         if timestep.first():
             self._max_offset = 0
         else:
-            self._max_offset += 1
-
+            self._max_offset = min(self._max_offset + 1, self.n_steps - 1)
         observation = timestep.observation
         action = next_timestep.action
         reward = next_timestep.reward

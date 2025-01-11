@@ -84,7 +84,7 @@ agent = agents.dqn_agents.DiscreteQNetAgent(
 )
 
 # Instantiate a trainer
-trainer = trainers.offline_trainers.Trainer(env, agent, args)
+trainer = trainers.offline_trainers.OfflineTrainer(env, agent, args)
 
 # Start training
 trainer.train()
