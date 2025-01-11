@@ -1,12 +1,14 @@
 from collections import deque
+from typing import Union
+
 import numpy as np
 
 from envquest.envs.common import TimeStep
 from envquest.memories.common import AgentMemory
 
 
-class DQNAgentMemory(AgentMemory):
-    def __init__(self, capacity: int, discount: float, n_steps: int):
+class ReplayMemory(AgentMemory):
+    def __init__(self, capacity: int, discount: float, n_steps: Union[int, float]):
         self.discount = discount
         self.capacity = capacity
         self.n_steps = n_steps
@@ -51,12 +53,13 @@ class DQNAgentMemory(AgentMemory):
     def __len__(self):
         return len(self.observations)
 
-    def sample(self, size: int = None, **kwargs) -> tuple[np.ndarray, ...]:
+    def sample(self, size: int = None, recent: bool = False, **kwargs) -> tuple[np.ndarray, ...]:
         if size is None:
             raise ValueError("'size' is required")
 
         indices = np.arange(len(self), dtype=np.int32)
-        indices = np.random.choice(indices, size=indices.shape[0], replace=False)
+        if not recent:
+            indices = np.random.choice(indices, size=indices.shape[0], replace=False)
         indices = indices[-size:]
 
         observations = np.stack(self.observations)[indices]

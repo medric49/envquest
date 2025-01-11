@@ -8,7 +8,9 @@ from envquest import arguments, envs, agents, trainers
 def main():
     # Training arguments
     args = arguments.TrainingArguments(
-        agent=arguments.DQNAgentArguments(), logging=arguments.LoggingArguments(save_agent_snapshots=False)
+        trainer=arguments.OnlineTrainerArguments(),
+        agent=arguments.PGAgentArguments(),
+        logging=arguments.LoggingArguments(save_agent_snapshots=False),
     )
 
     # Define environment
@@ -16,16 +18,10 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.dqn_agents.DiscreteQNetAgent(
+        agent = agents.pg_agents.PGAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
-            n_steps=args.agent.n_steps,
             lr=args.agent.lr,
-            tau=args.agent.tau,
-            eps_start=args.agent.eps_start,
-            eps_end=args.agent.eps_end,
-            eps_step_duration=args.agent.eps_step_duration,
-            eps_decay=args.agent.eps_decay,
             observation_space=env.observation_space,
             action_space=env.action_space,
         )
@@ -35,7 +31,7 @@ def main():
         )
 
     # Define trainer
-    trainer = trainers.offline_trainers.OfflineTrainer(env, agent, args)
+    trainer = trainers.online_trainers.OnlineTrainer(env, agent, args)
 
     # Start training
     trainer.train()

@@ -5,8 +5,8 @@ import torch
 from envquest import utils
 from envquest.agents.common import Agent, EpsilonDecay
 from envquest.envs.common import TimeStep
-from envquest.functions.discrete_qnet import DiscreteQNet
-from envquest.memories.dqn import DQNAgentMemory
+from envquest.functions.q_values import DiscreteQNet
+from envquest.memories.replay_memories import ReplayMemory
 
 
 class DiscreteQNetAgent(Agent):
@@ -26,7 +26,7 @@ class DiscreteQNetAgent(Agent):
     ):
         super().__init__(observation_space=observation_space, action_space=action_space)
 
-        self.memory = DQNAgentMemory(mem_capacity, discount, n_steps=n_steps)
+        self.memory = ReplayMemory(mem_capacity, discount, n_steps=n_steps)
         observation_dim = observation_space.shape[0]
 
         self.q_net = DiscreteQNet(observation_dim, action_space.n).to(device=utils.device())

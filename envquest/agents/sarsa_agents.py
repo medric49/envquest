@@ -5,8 +5,8 @@ import torch
 from envquest import utils
 from envquest.agents.common import Agent
 from envquest.envs.common import TimeStep
-from envquest.functions.discrete_qnet import DiscreteQNet
-from envquest.memories.sarsa import SarsaAgentMemory
+from envquest.functions.q_values import DiscreteQNet
+from envquest.memories.sarsa_memories import SarsaAgentMemory
 
 
 class DiscreteSarsaAgent(Agent):
