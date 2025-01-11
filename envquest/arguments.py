@@ -11,6 +11,7 @@ class EnvArguments:
 
 @dataclass
 class LoggingArguments:
+    wandb_enabled: bool = True
     project_name: str = "envquest"
     exp_id: str = None
     render_width: int = 256
@@ -35,6 +36,10 @@ class TrainerArguments:
     eval_every_steps: int = 10000
 
 
+class OnlineTrainerArguments(TrainerArguments):
+    num_train_trajectories = 5
+
+
 @dataclass
 class AgentArguments:
     class_name: str = None
@@ -44,6 +49,12 @@ class AgentArguments:
     eps_end: float = 0.05
     eps_step_duration: int = 100000
     eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
+
+
+@dataclass
+class PGAgentArguments(AgentArguments):
+    class_name: str = "pg"
+    mem_capacity: int = 1000000
 
 
 @dataclass

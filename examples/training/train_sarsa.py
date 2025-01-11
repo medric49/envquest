@@ -18,7 +18,7 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.sarsa.DiscreteSarsaAgent(
+        agent = agents.sarsa_agents.DiscreteSarsaAgent(
             discount=args.agent.discount,
             lr=args.agent.lr,
             eps_start=args.agent.eps_start,
@@ -34,7 +34,7 @@ def main():
         )
 
     # Define trainer
-    trainer = trainers.Trainer(env, agent, args)
+    trainer = trainers.offline_trainers.OfflineTrainer(env, agent, args)
 
     # Start training
     trainer.train()
