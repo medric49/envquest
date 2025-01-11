@@ -14,7 +14,7 @@ from envquest import envs, agents
 env = envs.gym.GymEnvironment.from_task("LunarLander-v3")
 
 # Instantiate an agent
-agent = agents.simple.RandomAgent(env.observation_space, env.action_space)
+agent = agents.simple_agents.RandomAgent(env.observation_space, env.action_space)
 
 # Execute an MDP
 timestep = env.reset()
@@ -69,7 +69,7 @@ args = arguments.TrainingArguments(
 env = envs.gym.GymEnvironment.from_task(task=args.env.task, max_episode_length=args.env.max_episode_length)
 
 # Instantiate a DQN Agent
-agent = agents.dqn.DiscreteQNetAgent(
+agent = agents.dqn_agents.DiscreteQNetAgent(
     mem_capacity=args.agent.mem_capacity,
     discount=args.agent.discount,
     n_steps=args.agent.n_steps,
@@ -84,7 +84,7 @@ agent = agents.dqn.DiscreteQNetAgent(
 )
 
 # Instantiate a trainer
-trainer = trainers.Trainer(env, agent, args)
+trainer = trainers.offline_trainers.Trainer(env, agent, args)
 
 # Start training
 trainer.train()
