@@ -38,11 +38,6 @@ class OnlineTrainer(Trainer):
 
                         # Compute action
                         action = self.agent.act(observation=timestep.observation, noisy=True)
-                        if hasattr(self.agent, "current_noise") and self.arguments.logging.wandb_enabled:
-                            wandb.log(
-                                {"train/noise": self.agent.current_noise},
-                                step=self.train_step,
-                            )
 
                         # Execute step
                         prev_timestep = timestep
@@ -78,9 +73,7 @@ class OnlineTrainer(Trainer):
 
                 # Improve agent
                 for _ in range(self.arguments.trainer.num_updates):
-                    metrics = self.agent.improve(
-                        batch_size=self.arguments.trainer.batch_size,
-                    )
+                    metrics = self.agent.improve()
                 if self.arguments.logging.wandb_enabled:
                     wandb.log(metrics, step=self.train_step)
 

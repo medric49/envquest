@@ -18,7 +18,7 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.pg_agents.PGAgent(
+        agent = agents.pg_agents.DiscretePGAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,

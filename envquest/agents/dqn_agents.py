@@ -124,4 +124,5 @@ class DiscreteQNetAgent(Agent):
             "train/batch/q_value": value.mean().item(),
             "train/batch/q_value_loss": loss.item(),
             "train/batch/next_value": next_value.mean().item(),
+            "train/noise": self.current_noise,
         }

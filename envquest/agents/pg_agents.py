@@ -13,7 +13,7 @@ from envquest.functions.policies import DiscretePolicyNet
 from envquest.memories.replay_memories import ReplayMemory
 
 
-class PGAgent(Agent):
+class DiscretePGAgent(Agent):
     def __init__(
         self,
         mem_capacity: int,
@@ -66,18 +66,21 @@ class PGAgent(Agent):
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        stand_reward = utils.standardize(reward, reward.mean(), reward.std())
+        stand_reward = torch.tensor(stand_reward, dtype=torch.float32, device=utils.device())
 
         self.policy.train()
         self.optimizer.zero_grad()
         pred_action = self.policy(obs)
         pred_action_dist = distributions.Categorical(pred_action / self.temperature)
-        loss = -pred_action_dist.log_prob(action) * reward
+        loss = -pred_action_dist.log_prob(action) * stand_reward
         loss = loss.mean()
         loss.backward()
         self.optimizer.step()
 
         self.last_policy_improvement_step = self.step_count
+        self.memory.initialize()
+
         return {
             "train/batch/reward": reward.mean().item(),
             "train/batch/loss": loss.item(),
