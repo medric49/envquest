@@ -55,13 +55,14 @@ wandb server start
 ```
 
 Then, train a DQN agent in a gym's CartPole-v1 environment.
+
 ```python
 from envquest import arguments, envs, agents, trainers
 
 # Define training arguments
 args = arguments.TrainingArguments(
     env=arguments.EnvArguments(task="CartPole-v1"),
-    agent=arguments.DQNAgentArguments(), 
+    agent=arguments.DQNAgentArguments(),
     logging=arguments.LoggingArguments(save_agent_snapshots=False)
 )
 
@@ -84,7 +85,7 @@ agent = agents.dqn_agents.DiscreteQNetAgent(
 )
 
 # Instantiate a trainer
-trainer = trainers.offline_trainers.OfflineTrainer(env, agent, args)
+trainer = trainers.td_trainers.TDTrainer(env, agent, args)
 
 # Start training
 trainer.train()

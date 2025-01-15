@@ -34,7 +34,7 @@ def main():
         )
 
     # Define trainer
-    trainer = trainers.offline_trainers.OfflineTrainer(env, agent, args)
+    trainer = trainers.td_trainers.TDTrainer(env, agent, args)
 
     # Start training
     trainer.train()

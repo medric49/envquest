@@ -8,7 +8,7 @@ from envquest import utils
 from envquest.trainers.common import Trainer
 
 
-class OnlineTrainer(Trainer):
+class MCTrainer(Trainer):
 
     def train(self):
         if self.arguments.logging.wandb_enabled:

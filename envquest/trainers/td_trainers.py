@@ -7,7 +7,7 @@ from envquest import utils
 from envquest.trainers.common import Trainer
 
 
-class OfflineTrainer(Trainer):
+class TDTrainer(Trainer):
 
     def train(self):
         if self.arguments.logging.wandb_enabled:

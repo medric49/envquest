@@ -13,7 +13,7 @@ from envquest.functions.policies import DiscretePolicyNet
 from envquest.memories.replay_memories import ReplayMemory
 
 
-class DiscretePGAgent(Agent):
+class DiscreteREINFORCEAgent(Agent):
     def __init__(
         self,
         mem_capacity: int,
@@ -29,7 +29,6 @@ class DiscretePGAgent(Agent):
         self.policy.apply(utils.init_weights)
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
 
-        self.temperature = 1
         self.last_policy_improvement_step = 0
         self.step_count = 0
 
@@ -49,7 +48,7 @@ class DiscretePGAgent(Agent):
                 action = action.argmax().item()
                 action = np.asarray(action, dtype=np.int64)
             else:
-                action_dist = distributions.Categorical(action / self.temperature)
+                action_dist = distributions.Categorical(action)
                 action = action_dist.sample().item()
                 action = np.asarray(action, dtype=np.int64)
         return action
@@ -72,7 +71,7 @@ class DiscretePGAgent(Agent):
         self.policy.train()
         self.optimizer.zero_grad()
         pred_action = self.policy(obs)
-        pred_action_dist = distributions.Categorical(pred_action / self.temperature)
+        pred_action_dist = distributions.Categorical(pred_action)
         loss = -pred_action_dist.log_prob(action) * stand_reward
         loss = loss.mean()
         loss.backward()
@@ -84,5 +83,5 @@ class DiscretePGAgent(Agent):
         return {
             "train/batch/reward": reward.mean().item(),
             "train/batch/loss": loss.item(),
-            "train/batch/entropy": distributions.Categorical(pred_action).entropy().mean().item(),
+            "train/batch/entropy": pred_action_dist.entropy().mean().item(),
         }
