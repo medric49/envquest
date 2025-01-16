@@ -9,7 +9,7 @@ def main():
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.MCTrainerArguments(),
-        agent=arguments.PGAgentArguments(),
+        agent=arguments.PGAgentArguments(class_name="vanilla_pg"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
     )
 
@@ -18,7 +18,7 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.pg_agents.DiscreteREINFORCEAgent(
+        agent = agents.pg_agents.DiscreteVanillaPGAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,

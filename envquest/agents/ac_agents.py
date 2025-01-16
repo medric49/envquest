@@ -31,7 +31,7 @@ class DiscreteA2CAgent(Agent):
 
         self.v_net = DiscreteVNet(observation_space.shape[0]).to(device=utils.device())
         self.v_net.apply(utils.init_weights)
-        self.v_optimizer = torch.optim.Adam(self.v_net.parameters(), lr=lr)
+        self.v_net_optimizer = torch.optim.Adam(self.v_net.parameters(), lr=lr)
 
         self.discount = discount
         self.criterion = torch.nn.MSELoss()
@@ -67,16 +67,16 @@ class DiscreteA2CAgent(Agent):
     def improve(self, batch_size: int = None, **kwargs) -> dict:
         if batch_size is None:
             raise ValueError("'batch_size' is required")
-        if len(self.memory) == 0:
+        if len(self.memory) < batch_size:
             return {}
 
         metrics = {}
-        metrics.update(self.improve_policy())
-        metrics.update(self.improve_v_net(batch_size))
+        metrics.update(self.improve_actor())
+        metrics.update(self.improve_critic(batch_size))
 
         return metrics
 
-    def improve_policy(self) -> dict:
+    def improve_actor(self) -> dict:
         obs, action, reward, next_obs, next_obs_terminal = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
@@ -90,13 +90,12 @@ class DiscreteA2CAgent(Agent):
             obs_value = self.v_net(obs).flatten()
             next_obs_value = self.v_net(next_obs).flatten() * (1 - next_obs_terminal)
             advantage = reward + self.discount * next_obs_value - obs_value
-        stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
         self.policy.train()
         self.policy_optimizer.zero_grad()
         pred_action = self.policy(obs)
         pred_action_dist = distributions.Categorical(pred_action)
-        loss = -pred_action_dist.log_prob(action) * stand_advantage
+        loss = -pred_action_dist.log_prob(action) * advantage
         loss = loss.mean()
         loss.backward()
         self.policy_optimizer.step()
@@ -110,7 +109,7 @@ class DiscreteA2CAgent(Agent):
             "train/batch/entropy": pred_action_dist.entropy().mean().item(),
         }
 
-    def improve_v_net(self, batch_size) -> dict:
+    def improve_critic(self, batch_size) -> dict:
         obs, _, reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size, recent=False)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
@@ -124,11 +123,11 @@ class DiscreteA2CAgent(Agent):
             target_value = reward + self.discount * next_obs_value
 
         self.v_net.train()
-        self.v_optimizer.zero_grad()
+        self.v_net_optimizer.zero_grad()
         obs_value = self.v_net(obs).flatten()
         loss = self.criterion(obs_value, target_value)
         loss.backward()
-        self.v_optimizer.step()
+        self.v_net_optimizer.step()
 
         return {
             "train/batch/v_reward": reward.mean().item(),

@@ -73,7 +73,7 @@ class MCTrainer(Trainer):
 
                 # Improve agent
                 for _ in range(self.arguments.trainer.num_updates):
-                    metrics = self.agent.improve()
+                    metrics = self.agent.improve(batch_size=self.arguments.trainer.batch_size)
                 if self.arguments.logging.wandb_enabled:
                     wandb.log(metrics, step=self.train_step)
 
