@@ -8,8 +8,8 @@ from envquest import arguments, envs, agents, trainers
 def main():
     # Training arguments
     args = arguments.TrainingArguments(
-        trainer=arguments.OnlineTrainerArguments(),
-        agent=arguments.PGAgentArguments(),
+        trainer=arguments.TrainerArguments(num_seed_steps=0),
+        agent=arguments.ACAgentArguments(),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
     )
 
@@ -18,7 +18,7 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.pg_agents.PGAgent(
+        agent = agents.ac_agents.DiscreteA2CAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,
@@ -31,7 +31,7 @@ def main():
         )
 
     # Define trainer
-    trainer = trainers.online_trainers.OnlineTrainer(env, agent, args)
+    trainer = trainers.td_trainers.TDTrainer(env, agent, args)
 
     # Start training
     trainer.train()

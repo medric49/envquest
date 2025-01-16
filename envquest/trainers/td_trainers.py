@@ -7,7 +7,7 @@ from envquest import utils
 from envquest.trainers.common import Trainer
 
 
-class OfflineTrainer(Trainer):
+class TDTrainer(Trainer):
 
     def train(self):
         if self.arguments.logging.wandb_enabled:
@@ -41,11 +41,6 @@ class OfflineTrainer(Trainer):
                         action = self.agent.act(observation=timestep.observation, random=True)
                     else:
                         action = self.agent.act(observation=timestep.observation, noisy=True)
-                        if hasattr(self.agent, "current_noise") and self.arguments.logging.wandb_enabled:
-                            wandb.log(
-                                {"train/noise": self.agent.current_noise},
-                                step=self.train_step,
-                            )
 
                     # Execute step
                     prev_timestep = timestep

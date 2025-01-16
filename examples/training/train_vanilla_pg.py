@@ -8,8 +8,8 @@ from envquest import arguments, envs, agents, trainers
 def main():
     # Training arguments
     args = arguments.TrainingArguments(
-        trainer=arguments.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
-        agent=arguments.SarsaAgentArguments(),
+        trainer=arguments.MCTrainerArguments(),
+        agent=arguments.PGAgentArguments(class_name="vanilla_pg"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
     )
 
@@ -18,13 +18,10 @@ def main():
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
-        agent = agents.sarsa_agents.DiscreteSarsaAgent(
+        agent = agents.pg_agents.DiscreteVanillaPGAgent(
+            mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,
-            eps_start=args.agent.eps_start,
-            eps_end=args.agent.eps_end,
-            eps_step_duration=args.agent.eps_step_duration,
-            eps_decay=args.agent.eps_decay,
             observation_space=env.observation_space,
             action_space=env.action_space,
         )
@@ -34,7 +31,7 @@ def main():
         )
 
     # Define trainer
-    trainer = trainers.td_trainers.TDTrainer(env, agent, args)
+    trainer = trainers.mc_trainers.MCTrainer(env, agent, args)
 
     # Start training
     trainer.train()

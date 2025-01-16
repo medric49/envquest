@@ -8,7 +8,7 @@ from envquest import utils
 from envquest.trainers.common import Trainer
 
 
-class OnlineTrainer(Trainer):
+class MCTrainer(Trainer):
 
     def train(self):
         if self.arguments.logging.wandb_enabled:
@@ -38,11 +38,6 @@ class OnlineTrainer(Trainer):
 
                         # Compute action
                         action = self.agent.act(observation=timestep.observation, noisy=True)
-                        if hasattr(self.agent, "current_noise") and self.arguments.logging.wandb_enabled:
-                            wandb.log(
-                                {"train/noise": self.agent.current_noise},
-                                step=self.train_step,
-                            )
 
                         # Execute step
                         prev_timestep = timestep
@@ -78,9 +73,7 @@ class OnlineTrainer(Trainer):
 
                 # Improve agent
                 for _ in range(self.arguments.trainer.num_updates):
-                    metrics = self.agent.improve(
-                        batch_size=self.arguments.trainer.batch_size,
-                    )
+                    metrics = self.agent.improve(batch_size=self.arguments.trainer.batch_size)
                 if self.arguments.logging.wandb_enabled:
                     wandb.log(metrics, step=self.train_step)
 

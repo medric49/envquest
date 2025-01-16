@@ -36,7 +36,7 @@ class TrainerArguments:
     eval_every_steps: int = 10000
 
 
-class OnlineTrainerArguments(TrainerArguments):
+class MCTrainerArguments(TrainerArguments):
     num_train_trajectories = 5
 
 
@@ -54,6 +54,12 @@ class AgentArguments:
 @dataclass
 class PGAgentArguments(AgentArguments):
     class_name: str = "pg"
+    mem_capacity: int = 1000000
+
+
+@dataclass
+class ACAgentArguments(AgentArguments):
+    class_name: str = "ac"
     mem_capacity: int = 1000000
 
 

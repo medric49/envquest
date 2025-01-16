@@ -1,1 +1,1 @@
-from . import common, offline_trainers, online_trainers
+from . import common, td_trainers, mc_trainers

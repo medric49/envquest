@@ -6,7 +6,7 @@ from envquest import utils
 from envquest.agents.common import Agent
 from envquest.envs.common import TimeStep
 from envquest.functions.q_values import DiscreteQNet
-from envquest.memories.sarsa_memories import SarsaAgentMemory
+from envquest.memories.replay_memories import SarsaAgentMemory
 
 
 class DiscreteSarsaAgent(Agent):
@@ -107,4 +107,5 @@ class DiscreteSarsaAgent(Agent):
             "train/batch/q_value": value.mean().item(),
             "train/batch/q_value_loss": loss.item(),
             "train/batch/next_value": next_value.mean().item(),
+            "train/noise": self.current_noise,
         }
