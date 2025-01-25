@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "gymnasium[box2d]>=1.0.0",
+    "gymnasium>=1.0.0",
     "imageio[ffmpeg,pyav]>=2.35.1",
     "opencv-python>=4.10.0.84",
     "pillow>=10.4.0",
@@ -36,7 +36,9 @@ Issues = "https://github.com/medric49/envquest/issues"
 dev = [
     "black>=24.8.0",
     "fire>=0.7.0",
+    "gymnasium[box2d,mujoco]>=1.0.0",
     "jupyter>=1.1.1",
+    "metaworld",
     "pylint>=3.2.7",
     "toml>=0.10.2",
 ]
@@ -49,6 +51,9 @@ namespaces = false
 
 [tool.uv]
 native-tls = true
+
+[tool.uv.sources]
+metaworld = { git = "https://github.com/Farama-Foundation/Metaworld.git", rev = "master" }
 
 [tool.black]
 line-length = 120
@@ -74,5 +79,5 @@ disable = [
     "too-many-instance-attributes",
     "too-many-branches"
 ]
-ignore-paths = ["./.venv"]
+ignore-paths = ["./.venv", "wandb"]
 logging-format-style = "new"
