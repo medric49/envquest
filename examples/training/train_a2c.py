@@ -9,8 +9,9 @@ def main():
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.TrainerArguments(num_seed_steps=0),
-        agent=arguments.ACAgentArguments(),
+        agent=arguments.AgentArguments(class_name="a2c"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
+        env=arguments.EnvArguments(task="CartPole-v1"),
     )
 
     # Define environment

@@ -9,8 +9,9 @@ def main():
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.MCTrainerArguments(),
-        agent=arguments.PGAgentArguments(class_name="vanilla_pg"),
+        agent=arguments.AgentArguments(class_name="vanilla_pg"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
+        env=arguments.EnvArguments(task="CartPole-v1"),
     )
 
     # Define environment

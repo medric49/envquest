@@ -11,6 +11,7 @@ def main():
         trainer=arguments.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
         agent=arguments.SarsaAgentArguments(),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
+        env=arguments.EnvArguments(task="CartPole-v1"),
     )
 
     # Define environment

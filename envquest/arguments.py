@@ -36,8 +36,9 @@ class TrainerArguments:
     eval_every_steps: int = 10000
 
 
+@dataclass
 class MCTrainerArguments(TrainerArguments):
-    num_train_trajectories = 5
+    num_train_trajectories: int = 5
 
 
 @dataclass
@@ -45,22 +46,14 @@ class AgentArguments:
     class_name: str = None
     discount: float = 0.99
     lr: float = 1e-4
-    eps_start: float = 0.95
-    eps_end: float = 0.05
-    eps_step_duration: int = 100000
-    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
-
-
-@dataclass
-class PGAgentArguments(AgentArguments):
-    class_name: str = "pg"
     mem_capacity: int = 1000000
 
 
 @dataclass
-class ACAgentArguments(AgentArguments):
-    class_name: str = "ac"
-    mem_capacity: int = 1000000
+class PPOAgentArguments(AgentArguments):
+    class_name: str = "ppo"
+    clip_eps: float = 0.2
+    num_policy_updates: int = 5
 
 
 @dataclass
@@ -68,12 +61,21 @@ class DQNAgentArguments(AgentArguments):
     class_name: str = "dqn"
     n_steps: int = 6
     tau: float = 0.005
-    mem_capacity: int = 1000000
+
+    eps_start: float = 0.95
+    eps_end: float = 0.05
+    eps_step_duration: int = 100000
+    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
 class SarsaAgentArguments(AgentArguments):
     class_name: str = "sarsa"
+
+    eps_start: float = 0.95
+    eps_end: float = 0.05
+    eps_step_duration: int = 100000
+    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
