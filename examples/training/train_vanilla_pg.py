@@ -11,7 +11,7 @@ def main():
         trainer=arguments.MCTrainerArguments(),
         agent=arguments.AgentArguments(class_name="vanilla_pg"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
-        env=arguments.EnvArguments(task="CartPole-v1"),
+        env=arguments.EnvArguments(task="Ant-v5"),
     )
 
     # Define environment
@@ -27,8 +27,12 @@ def main():
             action_space=env.action_space,
         )
     else:
-        raise ValueError(
-            f"'[{args.env.task}]' task is not a discrete gym environment. This script currently only supports discrete environments."
+        agent = agents.pg_agents.ContinuousVanillaPGAgent(
+            mem_capacity=args.agent.mem_capacity,
+            discount=args.agent.discount,
+            lr=args.agent.lr,
+            observation_space=env.observation_space,
+            action_space=env.action_space,
         )
 
     # Define trainer
