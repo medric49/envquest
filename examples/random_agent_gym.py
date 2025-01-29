@@ -12,7 +12,7 @@ def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
     agent = agents.generics.RandomAgent(env.observation_space, env.action_space)
 
     timestep = env.reset()
-    while not timestep.last():
+    while True:
         frame = env.render(im_w, im_h)
         frame = np.asarray(frame)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -23,6 +23,9 @@ def main(env_name="LunarLander-v3", im_w=512, im_h=512, fps=30):
         timestep = env.step(action)
         if cv2.waitKey(1) == ord("q"):
             break
+
+        if timestep.last():
+            timestep = env.reset()
 
     cv2.destroyAllWindows()
 
