@@ -180,7 +180,6 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
         return action
 
 
-
 class ContinuousVanillaPGAgent(ContinuousPGAgent):
     def improve_actor(self) -> dict:
         obs, action, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
@@ -200,8 +199,8 @@ class ContinuousVanillaPGAgent(ContinuousPGAgent):
         self.policy_optimizer.zero_grad()
         pred_action = self.policy(obs)
         pred_action_dist = distributions.Normal(pred_action, self.noise)
-        log_prob =  pred_action_dist.log_prob(action).sum(dim=-1).flatten()
-        loss = - log_prob * stand_advantage
+        log_prob = pred_action_dist.log_prob(action).sum(dim=-1).flatten()
+        loss = -log_prob * stand_advantage
         loss = loss.mean()
         loss.backward()
         self.policy_optimizer.step()
