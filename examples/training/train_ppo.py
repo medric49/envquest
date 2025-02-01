@@ -11,7 +11,7 @@ def main():
         trainer=arguments.MCTrainerArguments(),
         agent=arguments.PPOAgentArguments(class_name="ppo"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
-        env=arguments.EnvArguments(task="CartPole-v1"),
+        env=arguments.EnvArguments(task="LunarLander-v3"),
     )
 
     # Define environment

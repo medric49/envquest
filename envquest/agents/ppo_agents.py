@@ -53,8 +53,6 @@ class DiscretePPOAgent(DiscretePGAgent):
             self.policy_optimizer.step()
             loss = loss.item()
 
-        self.last_policy_improvement_step = self.step_count
-
         return {
             "train/batch/p_reward": rtg.mean().item(),
             "train/batch/advantage": advantage.mean().item(),

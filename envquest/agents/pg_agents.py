@@ -44,19 +44,20 @@ class PGAgent(Agent, abc.ABC):
         return self.step_count - self.last_policy_improvement_step
 
     def improve(self, batch_size=None, **kwargs) -> dict:
-        if batch_size is None:
-            raise ValueError("'batch_size' is required")
+        # if batch_size is None:
+        #     raise ValueError("'batch_size' is required")
         if len(self.memory) == 0:
             return {}
 
         metrics = {}
         metrics.update(self.improve_actor())
-        metrics.update(self.improve_critic(batch_size))
+        metrics.update(self.improve_critic())
 
+        self.last_policy_improvement_step = self.step_count
         return metrics
 
-    def improve_critic(self, batch_size: int) -> dict:
-        obs, _, rtg, _, _ = self.memory.sample(size=batch_size, recent=False)
+    def improve_critic(self) -> dict:
+        obs, _, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
@@ -136,8 +137,6 @@ class DiscreteVanillaPGAgent(DiscretePGAgent):
         loss.backward()
         self.policy_optimizer.step()
 
-        self.last_policy_improvement_step = self.step_count
-
         return {
             "train/batch/p_reward": rtg.mean().item(),
             "train/batch/advantage": advantage.mean().item(),
@@ -204,8 +203,6 @@ class ContinuousVanillaPGAgent(ContinuousPGAgent):
         loss = loss.mean()
         loss.backward()
         self.policy_optimizer.step()
-
-        self.last_policy_improvement_step = self.step_count
 
         return {
             "train/batch/p_reward": rtg.mean().item(),
