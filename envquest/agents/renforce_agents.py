@@ -60,18 +60,18 @@ class DiscreteREINFORCEAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, action, _, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        stand_reward = utils.standardize(reward, reward.mean(), reward.std())
-        stand_reward = torch.tensor(stand_reward, dtype=torch.float32, device=utils.device())
+        stand_rtg = utils.standardize(rtg, rtg.mean(), rtg.std())
+        stand_rtg = torch.tensor(stand_rtg, dtype=torch.float32, device=utils.device())
 
         self.policy.train()
         self.optimizer.zero_grad()
         pred_action = self.policy(obs)
         pred_action_dist = distributions.Categorical(pred_action)
-        loss = -pred_action_dist.log_prob(action) * stand_reward
+        loss = -pred_action_dist.log_prob(action) * stand_rtg
         loss = loss.mean()
         loss.backward()
         self.optimizer.step()
@@ -80,7 +80,7 @@ class DiscreteREINFORCEAgent(Agent):
         self.memory.initialize()
 
         return {
-            "train/batch/reward": reward.mean().item(),
+            "train/batch/reward": rtg.mean().item(),
             "train/batch/loss": loss.item(),
             "train/batch/entropy": pred_action_dist.entropy().mean().item(),
         }

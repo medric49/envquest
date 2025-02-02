@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
@@ -11,7 +12,7 @@ def main():
         trainer=arguments.MCTrainerArguments(),
         agent=arguments.PPOAgentArguments(class_name="ppo"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
-        env=arguments.EnvArguments(task="LunarLander-v3"),
+        env=arguments.EnvArguments(task="CartPole-v1"),
     )
 
     # Define environment
@@ -41,4 +42,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)

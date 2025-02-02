@@ -26,6 +26,7 @@ class PGAgent(Agent, abc.ABC):
         super().__init__(observation_space, action_space)
 
         self.memory = ReplayMemory(mem_capacity, discount, n_steps=math.inf)
+        self.discount = discount
 
         self.v_net = DiscreteVNet(observation_space.shape[0]).to(device=utils.device())
         self.v_net.apply(utils.init_weights)
@@ -57,7 +58,7 @@ class PGAgent(Agent, abc.ABC):
         return metrics
 
     def improve_critic(self) -> dict:
-        obs, _, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, _, _, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
@@ -70,7 +71,7 @@ class PGAgent(Agent, abc.ABC):
         self.v_net_optimizer.step()
 
         return {
-            "train/batch/v_reward": rtg.mean().item(),
+            "train/batch/v_rtg": rtg.mean().item(),
             "train/batch/v_loss": loss.item(),
             "train/batch/v_value": obs_value.mean().item(),
         }
@@ -115,16 +116,21 @@ class DiscretePGAgent(PGAgent, abc.ABC):
 
 class DiscreteVanillaPGAgent(DiscretePGAgent):
     def improve_actor(self) -> dict:
-        obs, action, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, action, reward, _, next_obs, next_obs_terminal = self.memory.sample(
+            size=self.policy_batch_size, recent=True
+        )
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
+        reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.v_net.eval()
         with torch.no_grad():
             obs_value = self.v_net(obs).flatten()
-            advantage = rtg - obs_value
+            next_obs_value = self.v_net(next_obs).flatten()
+            advantage = reward + self.discount * next_obs_value * (1 - next_obs_terminal) - obs_value
 
         stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
@@ -138,7 +144,7 @@ class DiscreteVanillaPGAgent(DiscretePGAgent):
         self.policy_optimizer.step()
 
         return {
-            "train/batch/p_reward": rtg.mean().item(),
+            "train/batch/p_reward": reward.mean().item(),
             "train/batch/advantage": advantage.mean().item(),
             "train/batch/p_loss": loss.item(),
             "train/batch/entropy": pred_action_dist.entropy().mean().item(),
@@ -181,7 +187,7 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
 
 class ContinuousVanillaPGAgent(ContinuousPGAgent):
     def improve_actor(self) -> dict:
-        obs, action, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, action, reward, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.float32, device=utils.device())

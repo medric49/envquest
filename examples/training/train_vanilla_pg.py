@@ -1,17 +1,18 @@
 from dataclasses import asdict
 
+import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
 
 
-def main():
+def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.MCTrainerArguments(),
-        agent=arguments.AgentArguments(class_name="vanilla_pg"),
+        agent=arguments.AgentArguments(class_name="vanilla_pg", lr=0.001),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
-        env=arguments.EnvArguments(task="Ant-v5"),
+        env=arguments.EnvArguments(task=task),
     )
 
     # Define environment
@@ -43,4 +44,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)

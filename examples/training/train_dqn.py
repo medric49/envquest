@@ -1,16 +1,17 @@
 from dataclasses import asdict
 
+import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
 
 
-def main():
+def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
         agent=arguments.DQNAgentArguments(),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
-        env=arguments.EnvArguments(task="CartPole-v1"),
+        env=arguments.EnvArguments(task=task),
     )
 
     # Define environment
@@ -44,4 +45,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)

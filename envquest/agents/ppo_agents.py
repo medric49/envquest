@@ -22,17 +22,22 @@ class DiscretePPOAgent(DiscretePGAgent):
         self.num_policy_updates = num_policy_updates
 
     def improve_actor(self) -> dict:
-        obs, action, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, action, reward, _, next_obs, next_obs_terminal = self.memory.sample(
+            size=self.policy_batch_size, recent=True
+        )
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
+        reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
+        next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.v_net.eval()
         self.policy.eval()
         with torch.no_grad():
             obs_value = self.v_net(obs).flatten()
-            advantage = rtg - obs_value
+            next_obs_value = self.v_net(next_obs).flatten()
+            advantage = reward + self.discount * next_obs_value * (1 - next_obs_terminal) - obs_value
 
             stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
@@ -54,7 +59,7 @@ class DiscretePPOAgent(DiscretePGAgent):
             loss = loss.item()
 
         return {
-            "train/batch/p_reward": rtg.mean().item(),
+            "train/batch/p_reward": reward.mean().item(),
             "train/batch/advantage": advantage.mean().item(),
             "train/batch/p_loss": loss,
             "train/batch/entropy": source_action_dist.entropy().mean().item(),

@@ -77,7 +77,9 @@ class DiscreteA2CAgent(Agent):
         return metrics
 
     def improve_actor(self) -> dict:
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.sample(size=self.policy_batch_size, recent=True)
+        obs, action, reward, _, next_obs, next_obs_terminal = self.memory.sample(
+            size=self.policy_batch_size, recent=True
+        )
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
@@ -110,7 +112,7 @@ class DiscreteA2CAgent(Agent):
         }
 
     def improve_critic(self, batch_size) -> dict:
-        obs, _, reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size, recent=False)
+        obs, _, reward, _, next_obs, next_obs_terminal = self.memory.sample(size=batch_size, recent=False)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
