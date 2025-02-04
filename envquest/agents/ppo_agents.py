@@ -36,8 +36,12 @@ class DiscretePPOAgent(DiscretePGAgent):
         self.policy.eval()
         with torch.no_grad():
             obs_value = self.v_net(obs).flatten()
+            unstand_obs_value = utils.unstandardize(obs_value, self.batch_rtg_mean, self.batch_rtg_std)
+
             next_obs_value = self.v_net(next_obs).flatten()
-            advantage = reward + self.discount * next_obs_value * (1 - next_obs_terminal) - obs_value
+            unstand_next_obs_value = utils.unstandardize(next_obs_value, self.batch_rtg_mean, self.batch_rtg_std)
+
+            advantage = reward + self.discount * unstand_next_obs_value * (1 - next_obs_terminal) - unstand_obs_value
 
             stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 

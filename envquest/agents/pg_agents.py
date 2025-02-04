@@ -28,6 +28,9 @@ class PGAgent(Agent, abc.ABC):
         self.memory = ReplayMemory(mem_capacity, discount, n_steps=math.inf)
         self.discount = discount
 
+        self.batch_rtg_mean = None
+        self.batch_rtg_std = None
+
         self.v_net = DiscreteVNet(observation_space.shape[0]).to(device=utils.device())
         self.v_net.apply(utils.init_weights)
         self.v_net_optimizer = torch.optim.Adam(self.v_net.parameters(), lr=lr)
@@ -51,29 +54,38 @@ class PGAgent(Agent, abc.ABC):
             return {}
 
         metrics = {}
-        metrics.update(self.improve_actor())
+        if self.batch_rtg_std is not None and self.batch_rtg_mean is not None:
+            metrics.update(self.improve_actor())
         metrics.update(self.improve_critic())
 
         self.last_policy_improvement_step = self.step_count
+        self.memory.initialize()
         return metrics
 
     def improve_critic(self) -> dict:
         obs, _, _, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
+        self.batch_rtg_mean = rtg.mean()
+        self.batch_rtg_std = rtg.std()
+
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
-        rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
+        stand_rtg = utils.standardize(rtg, self.batch_rtg_mean, self.batch_rtg_std)
+        stand_rtg = torch.tensor(stand_rtg, dtype=torch.float32, device=utils.device())
 
         self.v_net.train()
         self.v_net_optimizer.zero_grad()
         obs_value = self.v_net(obs).flatten()
-        loss = self.criterion(obs_value, rtg)
+        loss = self.criterion(obs_value, stand_rtg)
         loss.backward()
         self.v_net_optimizer.step()
 
+        unstand_obs_value = utils.unstandardize(
+            obs_value.cpu().detach().numpy(), self.batch_rtg_mean, self.batch_rtg_std
+        )
         return {
-            "train/batch/v_rtg": rtg.mean().item(),
+            "train/batch/v_rtg": rtg.mean(),
             "train/batch/v_loss": loss.item(),
-            "train/batch/v_value": obs_value.mean().item(),
+            "train/batch/v_value": unstand_obs_value.mean(),
         }
 
     @abc.abstractmethod
@@ -129,8 +141,12 @@ class DiscreteVanillaPGAgent(DiscretePGAgent):
         self.v_net.eval()
         with torch.no_grad():
             obs_value = self.v_net(obs).flatten()
+            unstand_obs_value = utils.unstandardize(obs_value, self.batch_rtg_mean, self.batch_rtg_std)
+
             next_obs_value = self.v_net(next_obs).flatten()
-            advantage = reward + self.discount * next_obs_value * (1 - next_obs_terminal) - obs_value
+            unstand_next_obs_value = utils.unstandardize(next_obs_value, self.batch_rtg_mean, self.batch_rtg_std)
+
+            advantage = reward + self.discount * unstand_next_obs_value * (1 - next_obs_terminal) - unstand_obs_value
 
         stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
