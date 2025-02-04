@@ -22,15 +22,11 @@ class DiscretePPOAgent(DiscretePGAgent):
         self.num_policy_updates = num_policy_updates
 
     def improve_actor(self) -> dict:
-        obs, action, reward, _, next_obs, next_obs_terminal = self.memory.sample(
-            size=self.policy_batch_size, recent=True
-        )
+        obs, action, reward, rtg, _, _ = self.memory.sample(size=self.policy_batch_size, recent=True)
 
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
-        next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
-        next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
+        rtg = torch.tensor(rtg, dtype=torch.float32, device=utils.device())
 
         self.v_net.eval()
         self.policy.eval()
@@ -38,10 +34,7 @@ class DiscretePPOAgent(DiscretePGAgent):
             obs_value = self.v_net(obs).flatten()
             unstand_obs_value = utils.unstandardize(obs_value, self.batch_rtg_mean, self.batch_rtg_std)
 
-            next_obs_value = self.v_net(next_obs).flatten()
-            unstand_next_obs_value = utils.unstandardize(next_obs_value, self.batch_rtg_mean, self.batch_rtg_std)
-
-            advantage = reward + self.discount * unstand_next_obs_value * (1 - next_obs_terminal) - unstand_obs_value
+            advantage = rtg - unstand_obs_value
 
             stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
