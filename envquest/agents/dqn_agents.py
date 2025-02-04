@@ -87,12 +87,12 @@ class DiscreteQNetAgent(Agent):
         if len(self.memory) == 0:
             return {}
 
-        obs, action, reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size)
+        obs, action, _, n_steps_reward, next_obs, next_obs_terminal = self.memory.sample(size=batch_size)
         obs = torch.tensor(obs, dtype=torch.float32, device=utils.device())
         next_obs = torch.tensor(next_obs, dtype=torch.float32, device=utils.device())
 
         action = torch.tensor(action, dtype=torch.int64, device=utils.device())
-        reward = torch.tensor(reward, dtype=torch.float32, device=utils.device())
+        n_steps_reward = torch.tensor(n_steps_reward, dtype=torch.float32, device=utils.device())
         next_obs_terminal = torch.tensor(next_obs_terminal, dtype=torch.float32, device=utils.device())
 
         self.q_net.eval()
@@ -102,7 +102,7 @@ class DiscreteQNetAgent(Agent):
             next_value = (self.target_q_net(next_obs).gather(dim=1, index=next_action.unsqueeze(dim=1)).flatten()) * (
                 1.0 - next_obs_terminal
             )
-        target = reward + (self.discount**self.n_steps) * next_value
+        target = n_steps_reward + (self.discount**self.n_steps) * next_value
 
         self.q_net.train()
         self.optimizer.zero_grad()
@@ -120,7 +120,7 @@ class DiscreteQNetAgent(Agent):
         self.target_q_net.load_state_dict(target_state_dict)
 
         return {
-            "train/batch/reward": reward.mean().item(),
+            "train/batch/reward": n_steps_reward.mean().item(),
             "train/batch/q_value": value.mean().item(),
             "train/batch/q_value_loss": loss.item(),
             "train/batch/next_value": next_value.mean().item(),

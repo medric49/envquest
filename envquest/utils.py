@@ -23,8 +23,8 @@ def standardize(x, mean, std, eps=1e-8):
     return (x - mean) / (std + eps)
 
 
-def normalize(x, x_min, x_max, eps=1e-6):
-    return (x - x_min) / (x_max - x_min + eps)
+def unstandardize(x, mean, std, eps=1e-8):
+    return x * (std + eps) + mean
 
 
 class Until:

@@ -17,6 +17,7 @@ class ReplayMemory(AgentMemory):
         self.observations = None
         self.actions = None
         self.rewards = None
+        self.n_steps_rewards = None
         self.next_observations = None
         self.next_step_terminal = None
 
@@ -26,6 +27,7 @@ class ReplayMemory(AgentMemory):
         self.observations = deque(maxlen=self.capacity)
         self.actions = deque(maxlen=self.capacity)
         self.rewards = deque(maxlen=self.capacity)
+        self.n_steps_rewards = deque(maxlen=self.capacity)
         self.next_observations = deque(maxlen=self.capacity)
         self.next_step_terminal = deque(maxlen=self.capacity)
 
@@ -43,12 +45,13 @@ class ReplayMemory(AgentMemory):
         self.observations.append(observation)
         self.actions.append(action)
         self.rewards.append(reward)
+        self.n_steps_rewards.append(reward)
         self.next_observations.append(next_observation)
         self.next_step_terminal.append(next_step_terminal)
 
         for offset in range(self._max_offset, 0, -1):
-            index = len(self.rewards) - offset
-            self.rewards[index] += (self.discount**offset) * reward
+            index = len(self.n_steps_rewards) - offset
+            self.n_steps_rewards[index] += (self.discount**offset) * reward
 
     def __len__(self):
         return len(self.observations)
@@ -67,11 +70,13 @@ class ReplayMemory(AgentMemory):
         next_observations = np.stack(self.next_observations)[indices]
         next_step_terminal = np.array(self.next_step_terminal, dtype=np.uint8)[indices]
         rewards = np.stack(self.rewards)[indices]
+        n_steps_rewards = np.stack(self.n_steps_rewards)[indices]
 
         return (
             observations,
             actions,
             rewards,
+            n_steps_rewards,
             next_observations,
             next_step_terminal,
         )
