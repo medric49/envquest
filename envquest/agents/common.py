@@ -6,7 +6,7 @@ from envquest.envs.common import TimeStep
 
 
 class EpsilonDecay:
-    LINERA = "linear"
+    LINEAR = "linear"
     EXPONENTIAL = "exponential"
 
 

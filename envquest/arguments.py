@@ -52,7 +52,7 @@ class AgentArguments:
 @dataclass
 class PPOAgentArguments(AgentArguments):
     class_name: str = "ppo"
-    clip_eps: float = 0.2
+    clip_eps: float = 0.1
     num_policy_updates: int = 5
 
 
