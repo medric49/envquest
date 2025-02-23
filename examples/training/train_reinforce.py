@@ -10,7 +10,6 @@ def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.MCTrainerArguments(),
-        agent=arguments.AgentArguments(class_name="reinforce"),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
         env=arguments.EnvArguments(task=task),
     )
@@ -20,6 +19,7 @@ def main(task: str = "CartPole-v1"):
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
+        args.agent = arguments.AgentArguments(class_name="reinforce")
         agent = agents.renforce_agents.DiscreteREINFORCEAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,

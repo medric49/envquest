@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from envquest import utils
-from envquest.agents.common import Agent, EpsilonDecay
+from envquest.agents.common import Agent, DecayType
 from envquest.envs.common import TimeStep
 from envquest.functions.q_values import DiscreteQNet
 from envquest.memories.replay_memories import ReplayMemory
@@ -47,9 +47,9 @@ class DiscreteQNetAgent(Agent):
 
     @property
     def current_noise(self):
-        if self.eps_decay == EpsilonDecay.LINEAR:
+        if self.eps_decay == DecayType.LINEAR:
             mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
+        elif self.eps_decay == DecayType.EXPONENTIAL:
             mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
         else:
             raise ValueError("Invalid value for 'eps_decay'")

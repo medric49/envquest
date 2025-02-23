@@ -5,7 +5,7 @@ import numpy as np
 from envquest.envs.common import TimeStep
 
 
-class EpsilonDecay:
+class DecayType:
     LINEAR = "linear"
     EXPONENTIAL = "exponential"
 

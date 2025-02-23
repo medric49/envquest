@@ -9,7 +9,6 @@ from envquest import arguments, envs, agents, trainers
 def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
-        agent=arguments.DQNAgentArguments(),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
         env=arguments.EnvArguments(task=task),
     )
@@ -19,6 +18,7 @@ def main(task: str = "CartPole-v1"):
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
+        args.agent = arguments.DQNAgentArguments()
         agent = agents.dqn_agents.DiscreteQNetAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,

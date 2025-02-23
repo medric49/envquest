@@ -4,14 +4,12 @@ import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
-from envquest.agents.common import EpsilonDecay
 
 
 def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.MCTrainerArguments(),
-        agent=arguments.AgentArguments(class_name="a2c", lr=0.001),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
         env=arguments.EnvArguments(task=task),
     )
@@ -21,6 +19,7 @@ def main(task: str = "CartPole-v1"):
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
+        args.agent = arguments.AgentArguments(class_name="a2c", lr=0.001)
         agent = agents.a2c_agents.DiscreteA2CAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
@@ -29,14 +28,15 @@ def main(task: str = "CartPole-v1"):
             action_space=env.action_space,
         )
     else:
+        args.agent = arguments.ContinuousPGAgentArguments(class_name="a2c", lr=0.001)
         agent = agents.a2c_agents.ContinuousA2CAgent(
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,
-            eps_start=0.1,
-            eps_end=0.05,
-            eps_decay=EpsilonDecay.LINEAR,
-            eps_step_duration=1000000,
+            noise_std_start=args.agent.noise_std_start,
+            noise_std_end=args.agent.noise_std_end,
+            noise_std_decay=args.agent.noise_std_decay,
+            noise_std_step_duration=args.agent.noise_std_step_duration,
             observation_space=env.observation_space,
             action_space=env.action_space,
         )

@@ -12,13 +12,13 @@ class DiscretePPOAgent(DiscretePGAgent):
         mem_capacity: int,
         discount: float,
         lr: float,
-        clip_eps: float,
+        clip_threshold: float,
         num_policy_updates: int,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
         super().__init__(mem_capacity, discount, lr, observation_space, action_space)
-        self.clip_eps = clip_eps
+        self.clip_threshold = clip_threshold
         self.num_policy_updates = num_policy_updates
 
     def improve_actor(self) -> dict:
@@ -42,7 +42,7 @@ class DiscretePPOAgent(DiscretePGAgent):
             source_action_dist = distributions.Categorical(source_action_probs)
             source_action_prob = source_action_probs.gather(dim=1, index=action.unsqueeze(dim=1)).flatten()
 
-            g = (1 + torch.sign(stand_advantage) * self.clip_eps) * stand_advantage
+            g = (1 + torch.sign(stand_advantage) * self.clip_threshold) * stand_advantage
 
         self.policy.train()
 
@@ -70,11 +70,11 @@ class ContinuousPPOAgent(ContinuousPGAgent):
         mem_capacity: int,
         discount: float,
         lr: float,
-        eps_start: float,
-        eps_end: float,
-        eps_decay: str,
-        eps_step_duration: int,
-        clip_eps: float,
+        noise_std_start: float,
+        noise_std_end: float,
+        noise_std_decay: str,
+        noise_std_step_duration: int,
+        clip_threshold: float,
         num_policy_updates: int,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Box,
@@ -83,15 +83,15 @@ class ContinuousPPOAgent(ContinuousPGAgent):
             mem_capacity,
             discount,
             lr,
-            eps_start,
-            eps_end,
-            eps_decay,
-            eps_step_duration,
+            noise_std_start,
+            noise_std_end,
+            noise_std_decay,
+            noise_std_step_duration,
             observation_space,
             action_space,
         )
 
-        self.clip_eps = clip_eps
+        self.clip_threshold = clip_threshold
         self.num_policy_updates = num_policy_updates
 
     def improve_actor(self) -> dict:
@@ -111,16 +111,16 @@ class ContinuousPPOAgent(ContinuousPGAgent):
 
             stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
-            source_action_dist = distributions.Normal(self.policy(obs), self.noise)
+            source_action_dist = distributions.Normal(self.policy(obs), self.noise_std)
             source_action_prob = source_action_dist.log_prob(action).sum(dim=-1).flatten()
 
-            g = (1 + torch.sign(stand_advantage) * self.clip_eps) * stand_advantage
+            g = (1 + torch.sign(stand_advantage) * self.clip_threshold) * stand_advantage
 
         self.policy.train()
 
         for _ in range(self.num_policy_updates):
             self.policy_optimizer.zero_grad()
-            action_dist = distributions.Normal(self.policy(obs), self.noise)
+            action_dist = distributions.Normal(self.policy(obs), self.noise_std)
             action_prob = action_dist.log_prob(action).sum(dim=-1).flatten()
             loss = -torch.stack([(action_prob / source_action_prob) * stand_advantage, g], dim=1).min(dim=1)[0]
             loss = loss.mean()
@@ -133,5 +133,5 @@ class ContinuousPPOAgent(ContinuousPGAgent):
             "train/batch/advantage": advantage.mean().item(),
             "train/batch/p_loss": loss,
             "train/batch/log_prob": source_action_prob.mean().item(),
-            "train/batch/noise": self.noise,
+            "train/batch/noise": self.noise_std,
         }

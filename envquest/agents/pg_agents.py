@@ -7,7 +7,7 @@ import torch
 from torch import distributions
 
 from envquest import utils
-from envquest.agents.common import Agent, EpsilonDecay
+from envquest.agents.common import Agent, DecayType
 from envquest.envs.common import TimeStep
 from envquest.functions.policies import DiscretePolicyNet, ContinuousPolicyNet
 from envquest.functions.v_values import DiscreteVNet
@@ -132,10 +132,10 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
         mem_capacity: int,
         discount: float,
         lr: float,
-        eps_start: float,
-        eps_end: float,
-        eps_decay: str,
-        eps_step_duration: int,
+        noise_std_start: float,
+        noise_std_end: float,
+        noise_std_decay: str,
+        noise_std_step_duration: int,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Box,
     ):
@@ -145,21 +145,21 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
         self.policy.apply(utils.init_weights)
         self.policy_optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
 
-        self.eps_start = eps_start
-        self.eps_end = eps_end
-        self.eps_decay = eps_decay
-        self.eps_step_duration = eps_step_duration
-        self.noise = self.current_noise
+        self.noise_std_start = noise_std_start
+        self.noise_std_end = noise_std_end
+        self.noise_std_decay = noise_std_decay
+        self.noise_std_step_duration = noise_std_step_duration
+        self.noise_std = self.current_noise_std
 
     @property
-    def current_noise(self):
-        if self.eps_decay == EpsilonDecay.LINEAR:
-            mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
-            mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+    def current_noise_std(self):
+        if self.noise_std_decay == DecayType.LINEAR:
+            mix = np.clip(self.step_count / self.noise_std_step_duration, 0.0, 1.0)
+        elif self.noise_std_decay == DecayType.EXPONENTIAL:
+            mix = 1 - np.exp(-4 * self.step_count / self.noise_std_step_duration)
         else:
             raise ValueError("Invalid value for 'eps_decay'")
-        noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
+        noise = (1.0 - mix) * self.noise_std_start + mix * self.noise_std_end
         return noise
 
     def act(self, observation: np.ndarray = None, noisy=False, **kwargs) -> np.ndarray:
@@ -173,12 +173,12 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
             if not noisy:
                 action = action.cpu().numpy()
             else:
-                action_dist = distributions.Normal(action, self.noise)
+                action_dist = distributions.Normal(action, self.noise_std)
                 action = action_dist.sample().cpu().numpy()
                 action = np.clip(action, -1.0, 1.0)
         return action
 
     def improve(self, batch_size=None, **kwargs) -> dict:
         metrics = super().improve(batch_size=batch_size, **kwargs)
-        self.noise = self.current_noise
+        self.noise_std = self.current_noise_std
         return metrics
