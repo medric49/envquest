@@ -47,9 +47,7 @@ class PGAgent(Agent, abc.ABC):
     def policy_batch_size(self):
         return self.step_count - self.last_policy_improvement_step
 
-    def improve(self, batch_size=None, **kwargs) -> dict:
-        # if batch_size is None:
-        #     raise ValueError("'batch_size' is required")
+    def improve(self, **kwargs) -> dict:
         if len(self.memory) == 0:
             return {}
 
