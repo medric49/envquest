@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 from envquest import utils
-from envquest.agents.common import Agent
+from envquest.agents.common import Agent, DecayType
 from envquest.envs.common import TimeStep
 from envquest.functions.q_values import DiscreteQNet
 from envquest.memories.replay_memories import SarsaAgentMemory
@@ -14,10 +14,10 @@ class DiscreteSarsaAgent(Agent):
         self,
         discount: float,
         lr: float,
-        eps_start: float,
-        eps_end: float,
-        eps_step_duration: int,
-        eps_decay: str,
+        greedy_eps_start: float,
+        greedy_eps_end: float,
+        greedy_eps_step_duration: int,
+        greedy_eps_decay: str,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Discrete,
     ):
@@ -33,20 +33,20 @@ class DiscreteSarsaAgent(Agent):
         self.discount = discount
 
         self.step_count = 0
-        self.eps_start = eps_start
-        self.eps_end = eps_end
-        self.eps_step_duration = eps_step_duration
-        self.eps_decay = eps_decay
+        self.greedy_eps_start = greedy_eps_start
+        self.greedy_eps_end = greedy_eps_end
+        self.greedy_eps_step_duration = greedy_eps_step_duration
+        self.greedy_eps_decay = greedy_eps_decay
 
     @property
     def current_noise(self):
-        if self.eps_decay == "linear":
-            mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
-        elif self.eps_decay == "exponential":
-            mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        if self.greedy_eps_decay == DecayType.LINEAR:
+            mix = np.clip(self.step_count / self.greedy_eps_step_duration, 0.0, 1.0)
+        elif self.greedy_eps_decay == DecayType.EXPONENTIAL:
+            mix = 1 - np.exp(-4 * self.step_count / self.greedy_eps_step_duration)
         else:
             raise ValueError("Invalid value for 'eps_decay'")
-        noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
+        noise = (1.0 - mix) * self.greedy_eps_start + mix * self.greedy_eps_end
         return noise
 
     def memorize(self, timestep: TimeStep, next_timestep: TimeStep):

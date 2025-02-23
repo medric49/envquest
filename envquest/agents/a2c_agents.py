@@ -59,7 +59,7 @@ class ContinuousA2CAgent(ContinuousPGAgent):
         self.policy.train()
         self.policy_optimizer.zero_grad()
         pred_action = self.policy(obs)
-        pred_action_dist = distributions.Normal(pred_action, self.noise)
+        pred_action_dist = distributions.Normal(pred_action, self.noise_std)
         log_prob = pred_action_dist.log_prob(action).sum(dim=-1).flatten()
         loss = -log_prob * stand_advantage
         loss = loss.mean()
@@ -71,5 +71,5 @@ class ContinuousA2CAgent(ContinuousPGAgent):
             "train/batch/advantage": advantage.mean().item(),
             "train/batch/p_loss": loss.item(),
             "train/batch/log_prob": log_prob.mean().item(),
-            "train/batch/noise": self.noise,
+            "train/batch/noise": self.noise_std,
         }

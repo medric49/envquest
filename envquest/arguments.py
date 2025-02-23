@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from envquest.agents.common import EpsilonDecay
+from envquest.agents.common import DecayType
 
 
 @dataclass
@@ -17,8 +17,8 @@ class LoggingArguments:
     render_width: int = 256
     render_height: int = 256
     save_train_videos: bool = False
-    log_eval_videos: bool = True
     save_eval_videos: bool = True
+    log_eval_videos: bool = False
     save_agent_snapshots: bool = True
 
 
@@ -50,10 +50,23 @@ class AgentArguments:
 
 
 @dataclass
+class ContinuousPGAgentArguments(AgentArguments):
+    noise_std_start: float = 0.3
+    noise_std_end: float = 0.1
+    noise_std_decay: str = DecayType.LINEAR
+    noise_std_step_duration: int = 1000000
+
+
+@dataclass
 class PPOAgentArguments(AgentArguments):
     class_name: str = "ppo"
-    clip_eps: float = 0.1
+    clip_threshold: float = 0.1
     num_policy_updates: int = 5
+
+
+@dataclass
+class ContinuousPPOAgentArguments(PPOAgentArguments, ContinuousPGAgentArguments):
+    pass
 
 
 @dataclass
@@ -62,20 +75,20 @@ class DQNAgentArguments(AgentArguments):
     n_steps: int = 6
     tau: float = 0.005
 
-    eps_start: float = 0.95
-    eps_end: float = 0.05
-    eps_step_duration: int = 100000
-    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
+    greedy_eps_start: float = 0.95
+    greedy_eps_end: float = 0.05
+    greedy_eps_step_duration: int = 100000
+    greedy_eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
 class SarsaAgentArguments(AgentArguments):
     class_name: str = "sarsa"
 
-    eps_start: float = 0.95
-    eps_end: float = 0.05
-    eps_step_duration: int = 100000
-    eps_decay: str = EpsilonDecay.EXPONENTIAL  # "linear" or "exponential"
+    greedy_eps_start: float = 0.95
+    greedy_eps_end: float = 0.05
+    greedy_eps_step_duration: int = 100000
+    greedy_eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass

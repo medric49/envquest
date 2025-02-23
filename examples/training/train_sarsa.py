@@ -10,7 +10,6 @@ def main(task: str = "CartPole-v1"):
     # Training arguments
     args = arguments.TrainingArguments(
         trainer=arguments.TrainerArguments(num_updates=1, update_every_steps=1, num_seed_steps=0),
-        agent=arguments.SarsaAgentArguments(),
         logging=arguments.LoggingArguments(save_agent_snapshots=False),
         env=arguments.EnvArguments(task=task),
     )
@@ -20,13 +19,14 @@ def main(task: str = "CartPole-v1"):
 
     # Define agent
     if isinstance(env.action_space, gym.spaces.Discrete):
+        args.agent = arguments.SarsaAgentArguments()
         agent = agents.sarsa_agents.DiscreteSarsaAgent(
             discount=args.agent.discount,
             lr=args.agent.lr,
-            eps_start=args.agent.eps_start,
-            eps_end=args.agent.eps_end,
-            eps_step_duration=args.agent.eps_step_duration,
-            eps_decay=args.agent.eps_decay,
+            greedy_eps_start=args.agent.greedy_eps_start,
+            greedy_eps_end=args.agent.greedy_eps_end,
+            greedy_eps_step_duration=args.agent.greedy_eps_step_duration,
+            greedy_eps_decay=args.agent.greedy_eps_decay,
             observation_space=env.observation_space,
             action_space=env.action_space,
         )
