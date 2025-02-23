@@ -51,7 +51,7 @@ class AgentArguments:
 
 @dataclass
 class ContinuousPGAgentArguments(AgentArguments):
-    noise_std_start: float = 0.2
+    noise_std_start: float = 0.3
     noise_std_end: float = 0.1
     noise_std_decay: str = DecayType.LINEAR
     noise_std_step_duration: int = 1000000
@@ -75,20 +75,20 @@ class DQNAgentArguments(AgentArguments):
     n_steps: int = 6
     tau: float = 0.005
 
-    eps_start: float = 0.95
-    eps_end: float = 0.05
-    eps_step_duration: int = 100000
-    eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
+    greedy_eps_start: float = 0.95
+    greedy_eps_end: float = 0.05
+    greedy_eps_step_duration: int = 100000
+    greedy_eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
 class SarsaAgentArguments(AgentArguments):
     class_name: str = "sarsa"
 
-    eps_start: float = 0.95
-    eps_end: float = 0.05
-    eps_step_duration: int = 100000
-    eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
+    greedy_eps_start: float = 0.95
+    greedy_eps_end: float = 0.05
+    greedy_eps_step_duration: int = 100000
+    greedy_eps_decay: str = DecayType.EXPONENTIAL  # "linear" or "exponential"
 
 
 @dataclass
