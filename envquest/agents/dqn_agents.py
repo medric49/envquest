@@ -47,7 +47,7 @@ class DiscreteQNetAgent(Agent):
 
     @property
     def current_noise(self):
-        if self.eps_decay == EpsilonDecay.LINERA:
+        if self.eps_decay == EpsilonDecay.LINEAR:
             mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
         elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
             mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)

@@ -4,6 +4,7 @@ import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
+from envquest.agents.common import EpsilonDecay
 
 
 def main(task: str = "CartPole-v1"):
@@ -32,6 +33,10 @@ def main(task: str = "CartPole-v1"):
             mem_capacity=args.agent.mem_capacity,
             discount=args.agent.discount,
             lr=args.agent.lr,
+            eps_start=0.1,
+            eps_end=0.05,
+            eps_decay=EpsilonDecay.LINEAR,
+            eps_step_duration=1000000,
             observation_space=env.observation_space,
             action_space=env.action_space,
         )

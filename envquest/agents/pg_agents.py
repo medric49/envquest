@@ -7,7 +7,7 @@ import torch
 from torch import distributions
 
 from envquest import utils
-from envquest.agents.common import Agent
+from envquest.agents.common import Agent, EpsilonDecay
 from envquest.envs.common import TimeStep
 from envquest.functions.policies import DiscretePolicyNet, ContinuousPolicyNet
 from envquest.functions.v_values import DiscreteVNet
@@ -132,6 +132,10 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
         mem_capacity: int,
         discount: float,
         lr: float,
+        eps_start: float,
+        eps_end: float,
+        eps_decay: str,
+        eps_step_duration: int,
         observation_space: gym.spaces.Box,
         action_space: gym.spaces.Box,
     ):
@@ -141,7 +145,22 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
         self.policy.apply(utils.init_weights)
         self.policy_optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
 
-        self.noise = 0.1
+        self.eps_start = eps_start
+        self.eps_end = eps_end
+        self.eps_decay = eps_decay
+        self.eps_step_duration = eps_step_duration
+        self.noise = self.current_noise
+
+    @property
+    def current_noise(self):
+        if self.eps_decay == EpsilonDecay.LINEAR:
+            mix = np.clip(self.step_count / self.eps_step_duration, 0.0, 1.0)
+        elif self.eps_decay == EpsilonDecay.EXPONENTIAL:
+            mix = 1 - np.exp(-4 * self.step_count / self.eps_step_duration)
+        else:
+            raise ValueError("Invalid value for 'eps_decay'")
+        noise = (1.0 - mix) * self.eps_start + mix * self.eps_end
+        return noise
 
     def act(self, observation: np.ndarray = None, noisy=False, **kwargs) -> np.ndarray:
         observation = torch.tensor(observation, dtype=torch.float32, device=utils.device())
@@ -153,8 +172,13 @@ class ContinuousPGAgent(PGAgent, abc.ABC):
 
             if not noisy:
                 action = action.cpu().numpy()
-                return action
             else:
                 action_dist = distributions.Normal(action, self.noise)
                 action = action_dist.sample().cpu().numpy()
+                action = np.clip(action, -1.0, 1.0)
         return action
+
+    def improve(self, batch_size=None, **kwargs) -> dict:
+        metrics = super().improve(batch_size=batch_size, **kwargs)
+        self.noise = self.current_noise
+        return metrics

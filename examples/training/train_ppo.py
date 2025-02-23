@@ -4,6 +4,7 @@ import fire
 import gymnasium as gym
 
 from envquest import arguments, envs, agents, trainers
+from envquest.agents.common import EpsilonDecay
 
 
 def main(task: str = "CartPole-v1"):
@@ -30,8 +31,18 @@ def main(task: str = "CartPole-v1"):
             action_space=env.action_space,
         )
     else:
-        raise ValueError(
-            f"'[{args.env.task}]' task is not a discrete gym environment. This script currently only supports discrete environments."
+        agent = agents.ppo_agents.ContinuousPPOAgent(
+            mem_capacity=args.agent.mem_capacity,
+            discount=args.agent.discount,
+            lr=args.agent.lr,
+            eps_start=0.4,
+            eps_end=0.05,
+            eps_decay=EpsilonDecay.LINEAR,
+            eps_step_duration=300000,
+            clip_eps=args.agent.clip_eps,
+            num_policy_updates=args.agent.num_policy_updates,
+            observation_space=env.observation_space,
+            action_space=env.action_space,
         )
 
     # Define trainer

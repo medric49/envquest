@@ -50,7 +50,9 @@ class ContinuousA2CAgent(ContinuousPGAgent):
         self.v_net.eval()
         with torch.no_grad():
             obs_value = self.v_net(obs).flatten()
-            advantage = rtg - obs_value
+            unstand_obs_value = utils.unstandardize(obs_value, self.batch_rtg_mean, self.batch_rtg_std)
+
+            advantage = rtg - unstand_obs_value
 
         stand_advantage = utils.standardize(advantage, advantage.mean(), advantage.std())
 
@@ -65,8 +67,9 @@ class ContinuousA2CAgent(ContinuousPGAgent):
         self.policy_optimizer.step()
 
         return {
-            "train/batch/p_reward": rtg.mean().item(),
+            "train/batch/p_reward": reward.mean(),
             "train/batch/advantage": advantage.mean().item(),
             "train/batch/p_loss": loss.item(),
-            "train/batch/entropy": pred_action_dist.entropy().mean().item(),
+            "train/batch/log_prob": log_prob.mean().item(),
+            "train/batch/noise": self.noise,
         }
